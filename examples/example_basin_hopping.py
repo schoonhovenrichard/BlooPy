@@ -40,12 +40,11 @@ searchspace = utils.create_bitstring_searchspace(m)
 converter = utils.bitstring_as_discrete(searchspace, mk_func.get_fitness)
 fitness_func = converter.get_fitness
 
-# Define the Basin Hopping algorithm
-
 count = 1
 for vals in searchspace.values():
     count *= len(vals)
-print("POINTS IN SEARCHSPACE:", count)
+print("Points in searchspace:", count)
+
 
 BASH = True
 MINIM = False
@@ -62,7 +61,6 @@ if BASH:
             T=temperature,
             method=method)
 
-    iterations = 10000
     x = test_bash.solve(max_iter=iterations,
                 max_time=10,#seconds
                 stopping_fitness=0.98*best_dp_fit,
@@ -75,12 +73,12 @@ if MINIM:
     ## Run local minimization
     # supported_methods = ["Nelder-Mead", "Powell", "CG", "L-BFGS-B", "COBYLA", "SLSQP", "BFGS"]
     method = "CG"
+    iterations = 10000
     test_minim = minim.local_minimizer(fitness_func,
             1,
             searchspace,
             method=method)
 
-    iterations = 10000
     x = test_minim.solve(max_iter=iterations,
                 max_time=10,#seconds
                 stopping_fitness=0.98*best_dp_fit,

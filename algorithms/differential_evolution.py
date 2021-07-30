@@ -75,6 +75,29 @@ class differential_evolution(continuous_base):
         if self.method is None:
             self.method = self.supported_methods[0]
 
+        self.solution = None
+        self.solution_fit = None
+
+    def cost_func(self, y):
+        r"""
+        Cost function to optimize.
+        NOTE: The "-1 *" is because differential evolution only does maximization
+        """
+        float_indiv = continuous_individual(y, self.sspace, scaling=self.eps)
+        bsstr = float_indiv.bitstring.to01()
+        if bsstr in self.visited_cache:
+            fit = self.visited_cache[bsstr]
+        else:
+            fit = -1 * self.minmax * self.ffunc(float_indiv.bitstring)
+            self.nfeval += 1
+            self.visited_cache[bsstr] = fit
+        if self.solution_fit is None or -1*self.minmax*self.solution_fit < -1*self.minmax*fit:
+            self.solution = y
+            self.solution_fit = fit
+        if self.nfeval >= self.maxf or self.solution_fit*self.minmax <= -1*self.stopfit*self.minmax:
+            raise Exception("Callback to break computation Differential evolution")
+        return fit
+
     def solve(self,
             min_variance, # Stopping population variance
             max_iter, # Max number of generations run
@@ -103,9 +126,11 @@ class differential_evolution(continuous_base):
         nr_vals = len(list(self.sspace.values()))
         self.maxf = max_funcevals
         tindiv = continuous_individual(nr_vals*[0.0], self.sspace, scaling=self.eps)
+        self.stopfit = stopping_fitness
 
-        solution = scop.differential_evolution(self.cost_func, bounds, popsize=self.pop_size, maxiter=max_iter, tol=min_variance, callback=StopAlgorithm(max_time, self.ffunc, stopping_fitness, tindiv, self), polish=self.hillclimb, strategy=self.method, mutation=self.mutation, recombination=self.recombination)
-
-        float_indiv = continuous_individual(solution.x, self.sspace, scaling=self.eps)
-        float_indiv.fitness = solution.fun
-        return (solution.fun, float_indiv, self.nfeval)
+        try:
+            solution = scop.differential_evolution(self.cost_func, bounds, popsize=self.pop_size, maxiter=max_iter, tol=min_variance, callback=StopAlgorithm(max_time, self.ffunc, stopping_fitness, tindiv, self), polish=self.hillclimb, strategy=self.method, mutation=self.mutation, recombination=self.recombination)
+        finally:
+            float_indiv = continuous_individual(self.solution, self.sspace, scaling=self.eps)
+            float_indiv.fitness = -1 * self.minmax * self.solution_fit
+            return (float_indiv.fitness, float_indiv, self.nfeval)
