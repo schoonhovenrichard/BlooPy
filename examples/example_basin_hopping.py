@@ -3,10 +3,10 @@ import sys
 from timeit import default_timer as timer
 import random
 
-from bitarray import bitarray
 import fitness_functions as ff
 import dynamic_programming as dp
 import algorithms.basin_hopping as bashop
+import utils
 
 ## Generate a (randomized) MK fitness function
 k = 4;
@@ -28,7 +28,6 @@ print("Max fitness DP:", best_dp_fit)
 #best_fit, sol = dp.bruteforce_MK_solve(mk_func)
 #print("Max fitness bruteforce:", best_fit)
 
-
 ffunc = mk_func.get_fitness
 bitstring_size = m
 
@@ -36,36 +35,8 @@ bitstring_size = m
 # NOTE: Continuous algorithms can be applied to low dimensional discrete
 #   problems with many values per parameter. Bitstring based problems, i.e.
 #   only 2 values per dimension are poorly suited.
-
-def create_bitstring_searchspace(bs_size):
-    searchspace = dict()
-    for i in range(bs_size):
-            searchspace[str(i)] = [0,1]
-    return searchspace
-
-class bitstring_as_discrete:
-    def __init__(self, searchspace, bit_fit_func):
-        self.sspace = searchspace
-        self.bit_fit_func = bit_fit_func
-
-    def get_fitness(self, x):
-        # As it is orignally a bitstring problem, we know each
-        #  variable only takes 2 values: 0 or 1.
-        if len(x) % 2 != 0:
-            print("HIER2")
-            raise Exception("Something wrong, should be multiple of 2")
-        bitstring = bitarray(len(x)//2)
-        bitstring.setall(False)
-        for i in range(len(bitstring)):
-            if sum(list(x[2*i:2*i+2])) != 1:
-                print("HIER3")
-                raise Exception("Error when encoding solution")
-            if x[1+2*i]:
-                bitstring[i] = True
-        return self.bit_fit_func(bitstring)
-
-searchspace = create_bitstring_searchspace(m)
-converter = bitstring_as_discrete(searchspace, mk_func.get_fitness)
+searchspace = utils.create_bitstring_searchspace(m)
+converter = utils.bitstring_as_discrete(searchspace, mk_func.get_fitness)
 fitness_func = converter.get_fitness
 
 # Define the Basin Hopping algorithm

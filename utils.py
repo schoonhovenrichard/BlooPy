@@ -63,6 +63,31 @@ class discrete_space:
             start_ind = end_ind
         return valid
 
+class bitstring_as_discrete:
+    def __init__(self, searchspace, bit_fit_func):
+        self.sspace = searchspace
+        self.bit_fit_func = bit_fit_func
+
+    def get_fitness(self, x):
+        # As it is orignally a bitstring problem, we know each
+        #  variable only takes 2 values: 0 or 1.
+        if len(x) % 2 != 0:
+            raise Exception("Something wrong, should be multiple of 2")
+        bitstring = bitarray(len(x)//2)
+        bitstring.setall(False)
+        for i in range(len(bitstring)):
+            if sum(list(x[2*i:2*i+2])) != 1:
+                raise Exception("Error when encoding solution")
+            if x[1+2*i]:
+                bitstring[i] = True
+        return self.bit_fit_func(bitstring)
+
+def create_bitstring_searchspace(bs_size):
+    searchspace = dict()
+    for i in range(bs_size):
+            searchspace[str(i)] = [0,1]
+    return searchspace
+
 def generate_boundary_list(sspace):
     r"""
     Generate the segments for encoding a search space
