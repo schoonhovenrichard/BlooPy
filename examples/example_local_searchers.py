@@ -69,7 +69,7 @@ if MLS:
     x = test_mls.solve(iterations,
                 max_time=60,#seconds
                 stopping_fitness=0.98*best_dp_fit,
-                max_funcevals=100000,
+                max_funcevals=200000,
                 verbose=True)
     print("Best fitness:",x[0],", fraction of optimal {0:.4f}".format(x[0]/float(best_dp_fit)))
 
@@ -113,6 +113,6 @@ if ILS:
     x = test_ils.solve(iterations,
                 max_time=60,#seconds
                 stopping_fitness=best_dp_fit,
-                max_funcevals=100000,
+                max_funcevals=200000,
                 verbose=True)
     print("Best fitness:",x[0],", fraction of optimal {0:.4f}".format(x[0]/float(best_dp_fit)))

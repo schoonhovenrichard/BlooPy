@@ -11,6 +11,7 @@ import selection_functions as sel
 import algorithms.genetic_local_search as gls
 import algorithms.hillclimbers as hill
 
+## Generate a (randomized) MK fitness function
 k = 4;
 m = 33*(k-1);
 randomMK = True
@@ -52,5 +53,5 @@ x = test_gls.solve(min_variance=0.1,
             no_improve=300,
             max_time=60,#seconds
             stopping_fitness=0.98*best_dp_fit,
-            max_funcevals=1000000)
+            max_funcevals=200000)
 print("Best fitness:",x[0],", fraction of optimal {0:.4f}".format(x[0]/float(best_dp_fit)))

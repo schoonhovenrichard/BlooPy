@@ -384,7 +384,4 @@ class simulated_annealing_KernelTuner(multi_start_local_search_base):
 
         if verbose:
             print("Terminated after {0} iterations with best fitness: {1:.3f} | # of fitness evals: {2}".format(it, best_fit, self.func_evals))
-
-        #print("A:", self.accept, "R:", self.reject, "I:", self.improve)
-        #raise Exception("PAUSE")
         return (best_fit, self.best_candidate, self.func_evals, self.cumulative_fit)
