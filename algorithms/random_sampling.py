@@ -10,7 +10,7 @@ from individual import individual
 
 
 class random_sampling:
-    def __init__(self, fitness_function, bitstring_size, minmax_problem, searchspace):
+    def __init__(self, fitness_function, bitstring_size, minmax_problem, searchspace=None):
         r"""
         Random sampling algorithm. Randomly draws examples from the searchspace
             until the maximum number of evaluations has been reached. Method
@@ -34,12 +34,16 @@ class random_sampling:
         self.minmax = minmax_problem
         self.bs_size = bitstring_size
         self.sspace = searchspace
-        self.boundary_list = utils.generate_boundary_list(self.sspace)
-
+        if searchspace is None:
+            self.boundary_list = None
+        else:
+            self.boundary_list = utils.generate_boundary_list(searchspace)
+    
     def solve(self,
             max_time, # Max running time in seconds
             stopping_fitness, # If we know the best solution, may as well stop early
-            max_funcevals=None
+            max_funcevals=None,
+            verbose=False,
             ):
         r"""
         Solve problem using the algorithm until certain conditions are met.
@@ -51,6 +55,8 @@ class random_sampling:
                 reached. If we do not know, put +-np.inf.
             max_funcevals (int): (optional) Maximum number of fitness
                 function evaluations before terminating.
+            verbose (bool): (optional) Run with the GA continually
+                printing status updates. Default is True.
 
         Returns tuple of:
             best_fit (float): Best fitness reached.
@@ -82,6 +88,8 @@ class random_sampling:
             elapsed_time = end - begintime
             if elapsed_time > max_time:
                 break
+            if verbose:
+                print('Running iteration {0} |Elapsed (s): {1:.2f} |Best fit: {2:.1f} |\r'.format(evl, elapsed_time, best_candidate.fitness), end="")
 
             if stopping_fitness is not None:
                 if self.minmax * best_candidate.fitness >= self.minmax * stopping_fitness:
