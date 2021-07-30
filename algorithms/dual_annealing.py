@@ -63,7 +63,7 @@ class dual_annealing(continuous_base):
                 minmax_problem,
                 searchspace)
         self.method = method
-        supported_methods = ['COBYLA','L-BFGS-B','SLSQP','CG','Powell','Nelder-Mead', 'BFGS', 'TNC', 'trust-constr']
+        supported_methods = ['COBYLA','L-BFGS-B','SLSQP','CG','Powell','Nelder-Mead', 'BFGS', 'trust-constr']
         if self.method not in supported_methods:
             raise Exception("Unknown method passed as local optimizer!")
 

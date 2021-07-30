@@ -76,7 +76,7 @@ class local_minimizer(continuous_base):
                 searchspace)
         self.method = method
 
-        supported_methods = ["Nelder-Mead", "Powell", "CG", "L-BFGS-B", "COBYLA", "SLSQP", "TNC", "BFGS"]
+        supported_methods = ["Nelder-Mead", "Powell", "CG", "L-BFGS-B", "COBYLA", "SLSQP", "BFGS"]
         if self.method not in supported_methods:
             raise Exception("Unknown method passed to local minimizer!")
         self.get_scaling()
@@ -119,12 +119,12 @@ class local_minimizer(continuous_base):
         bnds = self.get_scaling()
 
         kwargs = dict()
-        if self.method in ["L-BFGS-B", "SLSQP","TNC"]:
+        if self.method in ["L-BFGS-B", "SLSQP"]:
             lb = np.array(bnds)[:,0]
             ub = np.array(bnds)[:,1]
             bounds = scipy.optimize.Bounds(lb, ub)
             kwargs['bounds'] = bounds
-        if self.method in ["CG", "L-BFGS-B", "SLSQP", "TNC", "BFGS"]:
+        if self.method in ["CG", "L-BFGS-B", "SLSQP", "BFGS"]:
             options['eps'] = self.eps
         elif self.method == "COBYLA":
             options['rhobeg'] = self.eps

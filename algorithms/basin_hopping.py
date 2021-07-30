@@ -36,17 +36,17 @@ class StopAlgorithm(object):
         nfevals = self.parent.nfeval
 
         bestfit = self.ffunc(self.temp_indiv.bitstring)
-        if self.stop_fit is not None and bestfit <= self.stop_fit:
-            #print("Terminating optimization: optimal solution reached")
+        if self.stop_fit is not None and bestfit*self.parent.minmax >= self.stop_fit*self.parent.minmax:
+            print("Terminating optimization: optimal solution reached", flush=True)
             return True
         elif nfevals >= self.parent.maxf:
-            #print("Terminating optimization: max funcevals reached")
+            print("Terminating optimization: max funcevals reached", flush=True)
             return True
         elif elapsed > self.max_time:
-            #print("Terminating optimization: time limit reached")
+            print("Terminating optimization: time limit reached", flush=True)
             return True
         else:
-            print("Elapsed: %.3f sec" % elapsed, end="\r")
+            print("Elapsed: %.3f sec" % elapsed, end="\r", flush=True)
             return False
 
 class basin_hopping(continuous_base):
@@ -72,7 +72,7 @@ class basin_hopping(continuous_base):
         self.temp = T
         self.method = method
 
-        supported_methods = ["Nelder-Mead", "Powell", "CG", "L-BFGS-B", "COBYLA", "SLSQP", "TNC", "BFGS"]
+        supported_methods = ["Nelder-Mead", "Powell", "CG", "L-BFGS-B", "COBYLA", "SLSQP", "BFGS"]
         if self.method not in supported_methods:
             raise Exception("Unknown method passed to local minimizer!")
         self.get_scaling()
@@ -97,11 +97,11 @@ class basin_hopping(continuous_base):
             fit = self.ffunc(float_indiv.bitstring)
             self.nfeval += 1
             self.visited_cache[bsstr] = fit
-        if self.solution_fit is None or self.solution_fit > fit:
+        if self.solution_fit is None or self.minmax*self.solution_fit < self.minmax*fit:
             self.solution = y
             self.solution_fit = fit
-        if self.nfeval >= self.maxf or self.solution_fit <= self.stopfit:
-            raise Exception("Callback to break computation pyswarms")
+        if self.nfeval >= self.maxf or self.solution_fit*self.minmax >= self.stopfit*self.minmax:
+            raise Exception("Callback to break computation")
         return fit
 
     def solve(self,
@@ -137,13 +137,13 @@ class basin_hopping(continuous_base):
         minimizer_dict = dict()
         minimizer_dict['method'] = self.method
         
-        if self.method in ["L-BFGS-B", "SLSQP", "TNC"]:
+        if self.method in ["L-BFGS-B", "SLSQP"]:
             lb = np.array(bnds)[:,0]
             ub = np.array(bnds)[:,1]
             bounds = scipy.optimize.Bounds(lb, ub)
             minimizer_dict['bounds'] = bounds
         
-        if self.method in ["CG", "L-BFGS-B", "SLSQP", "TNC", "BFGS"]:
+        if self.method in ["CG", "L-BFGS-B", "SLSQP", "BFGS"]:
             options['eps'] = self.eps
         elif self.method == "COBYLA":
             options['rhobeg'] = self.eps
