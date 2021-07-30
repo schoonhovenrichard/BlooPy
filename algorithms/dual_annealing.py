@@ -76,13 +76,13 @@ class dual_annealing(continuous_base):
         if bsstr in self.visited_cache:
             fit = self.visited_cache[bsstr]
         else:
-            fit = self.ffunc(float_indiv.bitstring)
+            fit = -1 * self.minmax * self.ffunc(float_indiv.bitstring)
             self.nfeval += 1
             self.visited_cache[bsstr] = fit
-        if self.solution_fit is None or self.minmax*self.solution_fit < self.minmax*fit:
+        if self.solution_fit is None or -1*self.minmax*self.solution_fit < -1*self.minmax*fit:
             self.solution = y
             self.solution_fit = fit
-        if self.nfeval >= self.maxf or self.solution_fit*self.minmax >= self.stopfit*self.minmax:
+        if self.nfeval >= self.maxf or self.solution_fit*self.minmax <= -1*self.stopfit*self.minmax:
             raise Exception("Callback to break computation DSA")
         return fit
 
@@ -125,5 +125,5 @@ class dual_annealing(continuous_base):
             solution = scop.dual_annealing(self.cost_func, bounds, maxiter=max_iter, callback=StopAlgorithm(max_time, self.ffunc, stopping_fitness, tindiv, self), local_search_options=options)
         finally:
             float_indiv = continuous_individual(self.solution, self.sspace, scaling=self.eps)
-            float_indiv.fitness = self.solution_fit
-            return (self.solution_fit, float_indiv, self.nfeval)
+            float_indiv.fitness = -1 * self.minmax * self.solution_fit
+            return (float_indiv.fitness, float_indiv, self.nfeval)

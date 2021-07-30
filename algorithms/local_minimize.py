@@ -88,6 +88,25 @@ class local_minimizer(continuous_base):
         #x0 = [0.5*self.eps*len(v) for v in values]
         return np.array(x0)
 
+    def cost_func(self, y):
+        r"""
+        Intermediate function to supply to scipy.optimize function.
+        """
+        float_indiv = continuous_individual(y, self.sspace, scaling=self.eps)
+        bsstr = float_indiv.bitstring.to01()
+        if bsstr in self.visited_cache:
+            fit = self.visited_cache[bsstr]
+        else:
+            fit = -1 * self.minmax * self.ffunc(float_indiv.bitstring)
+            self.nfeval += 1
+            self.visited_cache[bsstr] = fit
+        if self.solution_fit is None or -1*self.minmax*self.solution_fit < -1*self.minmax*fit:
+            self.solution = y
+            self.solution_fit = fit
+        if self.nfeval >= self.maxf or self.solution_fit*self.minmax <= -1*self.stopfit*self.minmax:
+            raise Exception("Callback to break computation Basin Hopping")
+        return fit
+
     def solve(self,
             max_iter, # Max number of generations run
             max_time, # Max running time in seconds
@@ -113,6 +132,8 @@ class local_minimizer(continuous_base):
         """
         tindiv = continuous_individual(len(self.boundary_list)*[0.0], self.sspace, scaling=self.eps)
         self.maxf = max_funcevals
+        self.solution = None
+        self.solution_fit = None
 
         options = dict()
         bnds = self.get_scaling()
@@ -127,10 +148,14 @@ class local_minimizer(continuous_base):
             options['eps'] = self.eps
         elif self.method == "COBYLA":
             options['rhobeg'] = self.eps
+        self.stopfit = stopping_fitness
 
         x0 = self.get_x0(bnds)
 
-        solution = scop.minimize(self.cost_func, x0, method=self.method, options=options, **kwargs, callback=StopAlgorithm(max_time, self.ffunc, stopping_fitness, tindiv, self))
-        float_indiv = continuous_individual(solution.x, self.sspace, scaling=self.eps)
-        float_indiv.fitness = solution.fun
-        return (solution.fun, float_indiv, self.nfeval)
+        try:
+            with utils.suppress_stdout_stderr():
+                solution = scop.minimize(self.cost_func, x0, method=self.method, options=options, **kwargs, callback=StopAlgorithm(max_time, self.ffunc, stopping_fitness, tindiv, self))
+        finally:
+            float_indiv = continuous_individual(self.solution, self.sspace, scaling=self.eps)
+            float_indiv.fitness = -1 * self.minmax * self.solution_fit
+            return (float_indiv.fitness, float_indiv, self.nfeval)

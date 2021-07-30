@@ -10,7 +10,7 @@ import utils
 
 ## Generate a (randomized) MK fitness function
 k = 4;
-m = 6*(k-1);
+m = 33*(k-1);
 randomMK = True
 if randomMK:
     mk_func = ff.random_MK_function(m, k)

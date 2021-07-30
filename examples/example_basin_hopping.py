@@ -11,7 +11,7 @@ import utils
 
 ## Generate a (randomized) MK fitness function
 k = 4;
-m = 6*(k-1);
+m = 33*(k-1);
 randomMK = True
 if randomMK:
     mk_func = ff.random_MK_function(m, k)
@@ -45,7 +45,6 @@ for vals in searchspace.values():
     count *= len(vals)
 print("Points in searchspace:", count)
 
-
 BASH = True
 MINIM = False
 
@@ -62,7 +61,7 @@ if BASH:
             method=method)
 
     x = test_bash.solve(max_iter=iterations,
-                max_time=10,#seconds
+                max_time=20,#seconds
                 stopping_fitness=0.98*best_dp_fit,
                 max_funcevals=10000)
 
