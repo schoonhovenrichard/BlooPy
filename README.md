@@ -1,7 +1,7 @@
-# EvoPy: Python library for evolutionary optimization
+# BlooPy: Python library for black-box discrete optimization
 
 ## Dependencies
-**EvoPy** requires the following packages to function:
+**BlooPy** requires the following packages to function:
 - bitarray
 ``` shell
 conda install -c anaconda bitarray 
@@ -11,14 +11,22 @@ conda install -c anaconda bitarray
 ### Implemented algorithms
 - Genetic Algorithm
 - Genetic Local Search
-- Multi-start Local Search
-- Iterative Local Search
-- Tabu Search
+- Multi-start Local Search (4 different versions)
+- Iterative Local Search (4 different versions)
+- Tabu Search (2 different versions)
 - Simulated Annealing
+- Dual Annealing
+- Particle Swarm Optimization
+- Basin Hopping
+- Differential Evolution (and discrete version in beta test)
+- Continuous local minimization algorithms
 - Linkage Tree Genetic Algorithm (and greedy version) [[1]](#1).
-- Differential Evolution
 
-EvoPy allows users to assemble evolutionary algorithms by passing components such as mutation functions, reproduction functions to the algorithm at initialization: 
+Bloopy is a fast discrete optimization package because it translates the optimization to a bitstring encoding, and uses efficient bitstring procedures implemented in C. 
+
+In addition to fitness functions of type "bitarray() --> float", Bloopy is also usable with fitness functions on discrete vectors "list[] --> float" or fitness dictionaries. The ```utils.discrete_space``` performs encoding automatically performs the translation from fitness dict or vector-based function to bitstring encoding for the use. See examples/example_discrete_space.py.
+
+BlooPy allows users to assemble algorithms by passing components such as mutation functions, reproduction functions to the algorithm at initialization: 
 
 ```python
 fitness_functions # Input: bitstring of bitarray() type, Output: fitness (float)
@@ -29,9 +37,75 @@ selection_functions # Input: {list(individuals), list(individuals), float}. The 
 
 Additional components can easily be added by the user as long as the function has the same signature as specified.
 
-### Encoding solutions
+## Usage
 
-The algorithms are intended for discrete optimization problems, and they work on bitstrings. EvoPy implements two types of bitstring. 
+To learn more about the functionality of the package check out our
+examples folder. As a test suite, we have included code to generate adjacent, and randomized MK functions [[2]](#2). The examples folder contains scripts to test each algorithm on randomized MK functions. 
+
+Let's run a genetic algorithm (see examples/example_ga.py). Firstly, import the modules and set the seed for reproducibility:
+
+```python
+import random
+import fitness_functions as ff
+import dynamic_programming as dp
+import genetic_algorithm as ga
+import mutation_functions as mut
+import reproductive_functions as rep
+import selection_functions as sel
+
+random.seed(1234567)
+```
+
+Generate an adjacent or randomized MK function for testing. For this type of fitness function we have supplied a solver which uses dynamic programming.
+
+```python
+## Generate a (randomized) MK fitness function
+k = 4;
+m = 33*(k-1);
+randomMK = True
+if randomMK:
+    mk_func = ff.random_MK_function(m, k)
+    mk_func.generate()
+else:
+    mk_func = ff.adjacent_MK_function(m, k)
+    mk_func.generate()
+
+## Find optimal solution using dynamic programming for comparison
+best_dp_fit = dp.dp_solve_MK(mk_func)
+print("Max fitness DP:", best_dp_fit)
+```
+
+EvoPy allows users to assemble the components of an evolutionary algorithm separately, which can then be passed as functions at initialization:
+
+```python
+fitness_func = adj_mk_func.get_fitness
+population_size = 500
+reproductor = rep.twopoint_crossover
+selector = sel.tournament2_selection
+bitstring_size = m
+test_ga = ga.genetic_algorithm(fitness_func,
+            reproductor,
+            selector,
+            population_size,
+            bitstring_size,
+            min_max_problem=1, # This is a maximzation problem
+            input_pop=None)
+```
+
+Run the GA to solve the problem and choose termination conditions:
+
+```python
+x = test_ga.solve(min_variance=0.1,
+            max_iter=1000,
+            no_improve=300,
+            max_time=15,#seconds
+            stopping_fitness=0.98*best_dp_fit,#fraction of optimum we want (optional)
+            max_funcevals=200000)
+print("Best fitness:",x[0],", fraction of optimal {0:.4f}".format(x[0]/float(best_dp_fit)))
+```
+
+### Back-end encoding solutions
+Here is some background information on how Bloopy operates. The algorithms are intended for discrete optimization problems, and they work on bitstrings. BlooPy implements two types of bitstring. 
 
 - Normal bitstrings which can take on any permutation. In this case, EvoPy creates ```individual(..., boundary_list=None)``` objects.
 - Bounded bitstrings where only a single 1 can be present in each segment. The segments are defined by supplying a list of start- and endpoints of the segments: ```individual(..., boundary_list=[(0,4),(5,7),(8,12),..])```.
@@ -51,69 +125,6 @@ candidate = indiv.individual(5, boundary_list=[(0,2),(3,4)])
 ```
 
 All the optimization algorithms will handle boundary lists properly as keyword arguments. If a boundary list is provided, the algorithms will only consider suitable candidates.
-
-## Usage
-
-To learn more about the functionality of the package check out our
-examples folder. As a test suite, we have included code to generate adjacent, and randomized MK functions [[2]](#2). The examples folder contains scripts to test each algorithm on randomized MK functions. 
-
-Let's run a genetic algorithm. Firstly, import the modules and set the seed for reproducibility:
-
-```python
-import random
-import fitness_functions as ff
-import dynamic_programming as dp
-import genetic_algorithm as ga
-import mutation_functions as mut
-import reproductive_functions as rep
-import selection_functions as sel
-
-random.seed(123456)
-```
-
-Generate an adjacent or randomized MK function for testing. For this type of fitness function we have supplied a solver which uses dynamic programming.
-
-```python
-k = 4;
-m = 100*(k-1); #Should be divisible by k-1
-rand_mk_func = ff.random_MK_function(m, k)
-rand_mk_func.generate()
-rand_mk_func.set_random_bitmask()
-
-best_dp_fit = dp.dp_solve_adjacentMK(adj_mk_func)
-print("Max fitness DP:", best_dp_fit)
-```
-
-EvoPy allows users to assemble the components of an evolutionary algorithm separately, which can then be passed as functions at initialization:
-
-```python
-fitness_func = adj_mk_func.get_fitness
-population_size = 500
-mutator = mut.bs_point_mutate
-reproductor = rep.twopoint_crossover
-selector = sel.RTS_select_best_half
-bitstring_size = m
-test_ga = ga.genetic_algorithm(fitness_func,
-            mutator,
-            reproductor,
-            selector,
-            population_size,
-            bitstring_size,
-            min_max_problem=1, # This is a maximzation problem
-            input_pop=None)
-```
-
-Run the GA to solve the problem and choose termination conditions:
-
-```python
-x = test_ga.solve(min_variance=0.1,
-            max_iter=1000,
-            no_improve=300,
-            max_time=15,#seconds
-            stopping_fitness=1.0*best_dp_fit,
-            max_funcevals=100000)
-print("Best fitness:",x[0],", fraction of optimal {0:.4f}".format(x[0]/float(best_dp_fit)))
-```
 
 ## Articles
 

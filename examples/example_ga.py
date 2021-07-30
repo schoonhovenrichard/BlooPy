@@ -32,9 +32,9 @@ print("Max fitness DP:", best_dp_fit)
 #print("Max fitness bruteforce:", best_fit)
 
 fitness_func = mk_func.get_fitness
-population_size = 500
+population_size = 1000
 reproductor = rep.twopoint_crossover
-selector = sel.select_best_half 
+selector = sel.tournament2_selection
 bitstring_size = m
 
 ## We can optionally provide an input population
@@ -50,6 +50,6 @@ x = test_ga.solve(min_variance=0.1,
             max_iter=1000,
             no_improve=300,
             max_time=15,#seconds
-            stopping_fitness=0.95*best_dp_fit,
-            max_funcevals=100000)
+            stopping_fitness=0.98*best_dp_fit,
+            max_funcevals=200000)
 print("Best fitness:",x[0],", fraction of optimal {0:.4f}".format(x[0]/float(best_dp_fit)))
