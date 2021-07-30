@@ -38,19 +38,18 @@ class StopAlgorithm(object):
         nfevals = self.parent.nfeval
 
         bestfit = self.ffunc(self.temp_indiv.bitstring)
-        if self.stop_fit is not None and bestfit <= self.stop_fit:
-            #print("Terminating optimization: optimal solution reached")
+        if self.stop_fit is not None and bestfit*self.parent.minmax >= self.stop_fit*self.parent.minmax:
+            print("Terminating optimization: optimal solution reached", flush=True)
             return True
-        elif nfevals > self.parent.maxf:
-            #print("Terminating optimization: max funcevals reached")
+        elif nfevals >= self.parent.maxf:
+            print("Terminating optimization: max funcevals reached", flush=True)
             return True
         elif elapsed > self.max_time:
-            #print("Terminating optimization: time limit reached")
+            print("Terminating optimization: time limit reached", flush=True)
             return True
         else:
-            print("Elapsed: %.3f sec" % elapsed, end="\r")
+            print("Elapsed: %.3f sec" % elapsed, end="\r", flush=True)
             return False
-
 
 class local_minimizer(continuous_base):
     def __init__(self, fitness_function, minmax_problem, searchspace, method='COBYLA'):

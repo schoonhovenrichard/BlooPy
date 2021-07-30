@@ -31,17 +31,17 @@ class StopAlgorithm(object):
         nfevals = self.parent.nfeval
 
         bestfit = self.ffunc(self.temp_indiv.bitstring)
-        if self.stop_fit is not None and bestfit <= self.stop_fit:
-            #print("Terminating optimization: optimal solution reached", nfevals)
+        if self.stop_fit is not None and bestfit*self.parent.minmax >= self.stop_fit*self.parent.minmax:
+            print("Terminating optimization: optimal solution reached", flush=True)
             return True
         elif nfevals >= self.parent.maxf:
-            #print("Terminating optimization: max funcevals reached", nfevals)
+            print("Terminating optimization: max funcevals reached", flush=True)
             return True
         elif elapsed > self.max_time:
-            #print("Terminating optimization: time limit reached", nfevals)
+            print("Terminating optimization: time limit reached", flush=True)
             return True
         else:
-            print("Elapsed: %.3f sec" % elapsed, end="\r")
+            print("Elapsed: %.3f sec" % elapsed, end="\r", flush=True)
             return False
 
 
@@ -79,11 +79,10 @@ class dual_annealing(continuous_base):
             fit = self.ffunc(float_indiv.bitstring)
             self.nfeval += 1
             self.visited_cache[bsstr] = fit
-        if self.solution_fit is None or self.solution_fit > fit:
+        if self.solution_fit is None or self.minmax*self.solution_fit < self.minmax*fit:
             self.solution = y
             self.solution_fit = fit
-        if self.nfeval >= self.maxf:
-            #TODO: Maak custom exception en vang af met except
+        if self.nfeval >= self.maxf or self.solution_fit*self.minmax >= self.stopfit*self.minmax:
             raise Exception("Callback to break computation DSA")
         return fit
 
@@ -113,6 +112,8 @@ class dual_annealing(continuous_base):
         bounds = self.get_scaling()
         nr_vals = len(list(self.sspace.values()))
         self.maxf = max_funcevals
+        self.stopfit = stopping_fitness
+
         options = dict()
         options['method'] = self.method
 

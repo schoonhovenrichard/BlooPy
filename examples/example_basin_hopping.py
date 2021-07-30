@@ -6,6 +6,7 @@ import random
 import fitness_functions as ff
 import dynamic_programming as dp
 import algorithms.basin_hopping as bashop
+import algorithms.local_minimize as minim
 import utils
 
 ## Generate a (randomized) MK fitness function
@@ -46,21 +47,44 @@ for vals in searchspace.values():
     count *= len(vals)
 print("POINTS IN SEARCHSPACE:", count)
 
-# supported_methods = ["Nelder-Mead", "Powell", "CG", "L-BFGS-B", "COBYLA", "SLSQP", "TNC", "BFGS"]
-method = "SLSQP"
-temperature = 1.0
-iterations = 10000
-test_bash = bashop.basin_hopping(fitness_func,
-        1,
-        searchspace,
-        T=temperature,
-        method=method)
+BASH = True
+MINIM = False
 
-iterations=10000
-x = test_bash.solve(max_iter=iterations,
-            max_time=10,#seconds
-            stopping_fitness=0.98*best_dp_fit,
-            max_funcevals=10000)
+if BASH:
+    ## Run basin hopping
+    # supported_methods = ["Nelder-Mead", "Powell", "CG", "L-BFGS-B", "COBYLA", "SLSQP", "BFGS"]
+    method = "SLSQP"
+    temperature = 1.0
+    iterations = 10000
+    test_bash = bashop.basin_hopping(fitness_func,
+            1,
+            searchspace,
+            T=temperature,
+            method=method)
 
-print("Best fitness:",x[0],", fraction of optimal {0:.4f}".format(x[0]/float(best_dp_fit)))
-print("Function evaluations:", x[2])
+    iterations = 10000
+    x = test_bash.solve(max_iter=iterations,
+                max_time=10,#seconds
+                stopping_fitness=0.98*best_dp_fit,
+                max_funcevals=10000)
+
+    print("Best fitness:",x[0],", fraction of optimal {0:.4f}".format(x[0]/float(best_dp_fit)))
+    print("Function evaluations:", x[2])
+
+if MINIM:
+    ## Run local minimization
+    # supported_methods = ["Nelder-Mead", "Powell", "CG", "L-BFGS-B", "COBYLA", "SLSQP", "BFGS"]
+    method = "CG"
+    test_minim = minim.local_minimizer(fitness_func,
+            1,
+            searchspace,
+            method=method)
+
+    iterations = 10000
+    x = test_minim.solve(max_iter=iterations,
+                max_time=10,#seconds
+                stopping_fitness=0.98*best_dp_fit,
+                max_funcevals=10000)
+
+    print("Best fitness:",x[0],", fraction of optimal {0:.4f}".format(x[0]/float(best_dp_fit)))
+    print("Function evaluations:", x[2])

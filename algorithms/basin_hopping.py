@@ -101,7 +101,7 @@ class basin_hopping(continuous_base):
             self.solution = y
             self.solution_fit = fit
         if self.nfeval >= self.maxf or self.solution_fit*self.minmax >= self.stopfit*self.minmax:
-            raise Exception("Callback to break computation")
+            raise Exception("Callback to break computation Basin Hopping")
         return fit
 
     def solve(self,

@@ -30,17 +30,17 @@ class StopAlgorithm(object):
         nfevals = self.parent.nfeval
 
         bestfit = self.ffunc(self.temp_indiv.bitstring)
-        if self.stop_fit is not None and bestfit <= self.stop_fit:
-            #print("Terminating optimization: optimal solution reached")
+        if self.stop_fit is not None and self.parent.minmax*bestfit >= self.parent.minmax * self.stop_fit:
+            print("Terminating optimization: optimal solution reached", flush=True)
             return True
         elif nfevals >= self.parent.maxf:
-            #print("Terminating optimization: max funcevals reached")
+            print("Terminating optimization: max funcevals reached", flush=True)
             return True
         elif elapsed > self.max_time:
-            #print("Terminating optimization: time limit reached")
+            print("Terminating optimization: time limit reached", flush=True)
             return True
         else:
-            print("Elapsed: %.3f sec" % elapsed, end="\r")
+            print("Elapsed: %.3f sec" % elapsed, end="\r", flush=True)
             return False
 
 
@@ -101,7 +101,6 @@ class differential_evolution(continuous_base):
         """
         bounds = self.get_scaling()
         nr_vals = len(list(self.sspace.values()))
-        #multip = nr_vals * self.pop_size
         self.maxf = max_funcevals
         tindiv = continuous_individual(nr_vals*[0.0], self.sspace, scaling=self.eps)
 
