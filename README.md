@@ -36,9 +36,9 @@ pip install -e .
 - Continuous local minimization algorithms
 - Linkage Tree Genetic Algorithm (and greedy version) [[1]](#1).
 
-**Bloopy** is a fast discrete optimization package because it translates the optimization to a bitstring encoding, and uses efficient bitstring procedures implemented in C. 
+**BlooPy** is a fast discrete optimization package because it translates the optimization to a bitstring encoding, and uses efficient bitstring procedures implemented in C. 
 
-In addition to fitness functions of type "bitarray() --> float", **Bloopy** is also usable with fitness functions on discrete vectors "list[] --> float" or fitness dictionaries. The ```utils.discrete_space``` performs encoding automatically performs the translation from fitness dict or vector-based function to bitstring encoding for the use. See examples/example_discrete_space.py.
+In addition to fitness functions of type "bitarray() --> float", **BlooPy** is also usable with fitness functions on discrete vectors "list[] --> float" or fitness dictionaries. The ```utils.discrete_space``` performs encoding automatically performs the translation from fitness dict or vector-based function to bitstring encoding for the use. See examples/example_discrete_space.py.
 
 **BlooPy** allows users to assemble algorithms by passing components such as mutation functions, reproduction functions to the algorithm at initialization: 
 
@@ -119,7 +119,7 @@ print("Best fitness:",x[0],", fraction of optimal {0:.4f}".format(x[0]/float(bes
 ```
 
 ### Back-end encoding solutions
-Here is some background information on how **Bloopy** operates. The algorithms are intended for discrete optimization problems, and they work on bitstrings. **BlooPy** implements two types of bitstring. 
+Here is some background information on how **BlooPy** operates. The algorithms are intended for discrete optimization problems, and they work on bitstrings. **BlooPy** implements two types of bitstring. 
 
 - Normal bitstrings which can take on any permutation. In this case, **BlooPy** creates ```individual(..., boundary_list=None)``` objects.
 - Bounded bitstrings where only a single 1 can be present in each segment. The segments are defined by supplying a list of start- and endpoints of the segments: ```individual(..., boundary_list=[(0,4),(5,7),(8,12),..])```.
