@@ -11,30 +11,31 @@ import mutation_functions as mut
 import reproductive_functions as rep
 import selection_functions as sel
 
-random.seed(123456)
-
+## Generate a (randomized) MK fitness function
 k = 4;
 m = 33*(k-1);
+randomMK = True
+if randomMK:
+    mk_func = ff.random_MK_function(m, k)
+    mk_func.generate()
+else:
+    mk_func = ff.adjacent_MK_function(m, k)
+    mk_func.generate()
 
-adj_mk_func = ff.adjacent_MK_function(m, k)
-#rand_mk_func = ff.random_MK_function(m, k)
-adj_mk_func.generate()
-#rand_mk_func.generate()
-#rand_mk_func.set_random_bitmask()
-
-start2 = timer()
-best_dp_fit = dp.dp_solve_adjacentMK(adj_mk_func)
-end2 = timer()
-print("DP evaluation time (ms):", 1000*(end2-start2))
+## Find optimal solution using dynamic programming for comparison
+best_dp_fit = dp.dp_solve_MK(mk_func)
 print("Max fitness DP:", best_dp_fit)
 
-fitness_func = adj_mk_func.get_fitness
+# (We also have bruteforce solves but it is exponentially slow.
+# Only use it for bitstrings of sizes < 20 to check.
+
+#best_fit, sol = dp.bruteforce_MK_solve(mk_func)
+#print("Max fitness bruteforce:", best_fit)
+
+fitness_func = mk_func.get_fitness
 population_size = 200
-#mutator = mut.bs_point_mutate
-mutator = mut.trivial_mutate
 bitstring_size = m
 test_ltga = ltga.ltga(fitness_func,
-            mutator,
             population_size,
             bitstring_size,
             min_max_problem=1,
@@ -44,7 +45,7 @@ test_ltga = ltga.ltga(fitness_func,
 x = test_ltga.solve(min_variance=0.1,
             max_iter=1000,
             no_improve=300,
-            max_time=60,#seconds
-            stopping_fitness=0.95*best_dp_fit,
-            max_funcevals=10000)
+            max_time=30,#seconds
+            stopping_fitness=0.98*best_dp_fit,
+            max_funcevals=200000)
 print("Best fitness:",x[0],", fraction of optimal {0:.4f}".format(x[0]/float(best_dp_fit)))

@@ -49,7 +49,7 @@ class ltga(genetic_algorithm):
             self.LOGTOLIN = False
         else:
             self.LOGTOLIN = True
-        self.build_loglinear_dicts()
+            self.build_loglinear_dicts()
         super().__init__(fitness_function,
                 rep.mask_crossover_pair, # The reproductor is fixed now
                 None, # Selector is not used
@@ -139,7 +139,7 @@ class ltga(genetic_algorithm):
             self.cumulative_fit += sol.fitness
             self.func_evals += 1
 
-    def set_fitness(self, pop):
+    def set_fitness(self, sol):
         bsstr = sol.bitstring.to01()
         if bsstr in self.visited_cache:
             sol.fitness = self.visited_cache[bsstr]
