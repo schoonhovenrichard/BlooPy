@@ -36,26 +36,30 @@ Finally, install **BlooPy** by running
 pip install -e . 
 ```
 
-## Features
-### Implemented algorithms
-- Genetic Algorithm
-- Genetic Local Search
+## Implemented algorithms
+## Discrete local search algorithms
 - Multi-start Local Search (4 different versions)
 - Iterative Local Search (4 different versions)
 - Tabu Search (2 different versions)
 - Simulated Annealing
+
+## Discrete population-based algorithms
+- Genetic Algorithm
+- Genetic Local Search
+- Linkage Tree Genetic Algorithm (and greedy version) [[1]](#1).
+
+## Continuous (real-valued) optimization algorithms
 - Dual Annealing
 - Particle Swarm Optimization
 - Basin Hopping
 - Differential Evolution (and discrete version in beta test)
 - Continuous local minimization algorithms
-- Linkage Tree Genetic Algorithm (and greedy version) [[1]](#1).
 
 **BlooPy** is a fast discrete optimization package because it translates the optimization to a bitstring encoding, and uses efficient bitstring procedures implemented in C. 
 
 In addition to fitness functions of type "bitarray() --> float", **BlooPy** is also usable with fitness functions on discrete vectors "list[] --> float" or fitness dictionaries. The ```utils.discrete_space``` translates fitness dict or vector-based function to bitstring encoding for the use. See examples/example_discrete_space.py.
 
-**BlooPy** allows users to assemble algorithms by passing components such as mutation functions, reproduction functions to the algorithm at initialization: 
+**BlooPy** allows users to assemble components for population-based algorithms by passing components such as mutation functions, reproduction functions to the algorithm at initialization: 
 
 ```python
 fitness_functions # Input: bitstring of bitarray() type, Output: fitness (float)
