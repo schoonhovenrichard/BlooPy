@@ -10,7 +10,7 @@
 ---
 
 <h2 align="center">
-  Black-box optimization Python for bitstring, categorical, and numerical discrete problems with local, and population-based algorithms.
+  BlooPy: Black-box optimization Python for bitstring, categorical, and numerical discrete problems with local, and population-based algorithms.
 </h2>
 
 <br>
