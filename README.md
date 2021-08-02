@@ -1,4 +1,4 @@
-![plot](bloopy_logo.png)
+![Alt text](imgs/bloopy_logo.png?raw=true "Title")
 
 # BlooPy: Python library for black-box discrete optimization
 
