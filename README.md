@@ -174,8 +174,6 @@ print("Best fitness:",x[0],", fraction of optimal {0:.4f}".format(x[0]/float(bes
 Let's run a GreedyMLS algorithm on an example discrete categorical optimization problem. For this, we will use the ```utils.discrete_space``` class to map the categorical vectors to bitstring encoding automatically. Firstly, lets define some categorical search space and give each possibility a random fitness.
 
 
-In addition to fitness functions of type "bitarray() --> float", **BlooPy** is also usable with fitness functions on discrete vectors "list[] --> float" or fitness dictionaries. The ```utils.discrete_space``` translates fitness dict or vector-based function to bitstring encoding for the use. See examples/example_discrete_space.py.
-
 ```python
 import numpy as np
 from bitarray.util import ba2int
