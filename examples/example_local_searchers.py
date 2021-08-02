@@ -1,13 +1,9 @@
 import numpy as np
-import sys
 from timeit import default_timer as timer
 import random
 
 import fitness_functions as ff
 import dynamic_programming as dp
-import mutation_functions as mut
-import reproductive_functions as rep
-import selection_functions as sel
 import algorithms.local_search as mls
 import algorithms.iterative_local_search as ils
 

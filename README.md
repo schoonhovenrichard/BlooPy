@@ -75,6 +75,39 @@ Additional components can easily be added by the user as long as the function ha
 To learn more about the functionality of the package check out our
 examples folder. As a test suite, we have included code to generate adjacent, and randomized MK functions [[2]](#2). The examples folder contains scripts to test each algorithm on randomized MK functions. 
 
+<details open>
+<summary><b>GA on bitstring randomized MK function</b></summary>
+
+```python
+import numpy as np
+from bitarray.util import ba2int
+import algorithms.local_search as mls
+
+# Define fitness function and searchspace
+N = 20 # size of bitstring
+
+fitness_values = np.arange(1, 1 + 2**N)
+np.random.shuffle(fitness_values)
+fitness_func = lambda bs: fitness_values[ba2int(bs)]
+print("Size of search space:", len(fitness_values))
+
+# Configure Local Search algorithm (RandomGreedy MLS in this case)
+iterations = 10000 # Max number of random restarts
+minmax = -1 # -1 for minimization problem, +1 for maximization problem
+maxfeval = 100000 # Number of unique fitness queries MLS is allowed
+
+test_mls = mls.RandomGreedyMLS(fitness_func,
+        N,
+        minmax)
+
+best_fit, _, fevals = test_mls.solve(iterations,
+            max_time=10,#seconds
+            stopping_fitness=1,#1 is optimal value so we can stop
+            max_funcevals=maxfeval,
+            verbose=True)
+print("Best fitness found:", best_fit, "in", fevals, "evaluations | optimal fitness:", 1)
+```
+
 <details>
 <summary><b>GA on bitstring randomized MK function</b></summary>
 
@@ -91,6 +124,8 @@ import selection_functions as sel
 
 random.seed(1234567)
 ```
+</details>
+
 
 Generate an adjacent or randomized MK function for testing. For this type of fitness function we have supplied a solver which uses dynamic programming.
 

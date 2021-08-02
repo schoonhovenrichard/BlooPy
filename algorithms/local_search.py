@@ -131,7 +131,7 @@ class multi_start_local_search_base:
 
         if verbose:
             print("Terminated after {0} iterations with best fitness: {1:.3f} | # of fitness evals: {2}".format(it, best_fit, self.func_evals))
-        return (best_fit, self.best_candidate, self.func_evals, self.cumulative_fit)
+        return (best_fit, self.best_candidate, self.func_evals)
 
 class OrderedGreedyMLS(multi_start_local_search_base):
     def __init__(self, fitness_function, bitstring_size, minmax_problem, searchspace=None, neighbour='Hamming', restart_search=True, order=None):
