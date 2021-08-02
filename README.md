@@ -4,7 +4,16 @@
   <br>
 </p>
 
-# BlooPy: Python library for black-box discrete optimization
+
+<br>
+
+---
+
+<h2 align="center">
+  Fast black-box optimization for bitstring, categorial, and numerical discrete optimization problems with local, and population-based algorithms.
+</h2>
+
+<br>
 
 ## Installation
 Create conda environment:
