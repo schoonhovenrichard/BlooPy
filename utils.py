@@ -47,7 +47,6 @@ class discrete_space:
                 raise Exception("Asked to compute fitness of invalid bitstring!")
             vector.append(vals[indices[0]])
             start_ind = end_ind
-        print("VECTOR", vector)
         return self.fitness_func(vector)
 
     def isvalid(self, bitstring):

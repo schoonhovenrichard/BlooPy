@@ -5,8 +5,6 @@ import itertools as it
 import algorithms.local_search as mls
 import utils
 
-from bitarray import bitarray
-
 ### Construct some categorical discrete space
 searchspace = {"x1": [1,2,3,4,5,6],
                "x2": ["foo", "bar"],
@@ -23,45 +21,6 @@ print("Size of search space:", len(possible_xs))
 fitness_values = np.arange(1, 1 + len(possible_xs))
 np.random.shuffle(fitness_values)
 
-### Calculate bitstring size
-boundary_list = utils.generate_boundary_list(searchspace)
-bsize = utils.calculate_bitstring_length(searchspace)
-print("Size of bitstring:", bsize)
-
-
-def map_listvariable_to_index(bs):
-    r"""For discrete categorical problems, bitstrings are implemented
-      as segments where one bit is active in each segment, and this bit
-      designates the parameter value for that variable."""
-    # Find indices of active bits:
-    indices = [i for i, x in enumerate(list(bs)) if x]
-    index = 0
-    multip = len(possible_xs)
-    print(bs)
-    print(indices, multip, index)
-    for i, (seg_start, seg_end) in enumerate(boundary_list):
-        add = indices[i] - seg_start
-        print(add)
-        key = list(searchspace.keys())[i]
-        multip /= len(searchspace[key])
-        add *= multip
-        index += add
-    print(index)
-    raise Exception("BREAK")
-    return int(index)
-
-#fitness_func = lambda bs: fitness_values[map_encoding_to_index(bs)]
-def fitness_func(bs):
-    print(bs, map_listvariable_to_index(bs), fitness_values[map_listvariable_to_index(bs)])
-    return fitness_values[map_listvariable_to_index(bs)]
-
-"""
-map_encoding_to_index(bitarray("01000010100000100"))
-print(fitness_func(bitarray("01000010100000100")))
-for vec in possible_xs:
-    ls = []
-    it = 0
-    bs = bitarray("00000000000000000")
     for j, var in enumerate(vec):
         vals = ssvalues[j]
         for k, x in enumerate(vals):
@@ -69,18 +28,42 @@ for vec in possible_xs:
                 ls.append(k+it)
                 bs[k+it] = True
                 break
-        it += len(vals)
-#    print(ls, vec)
-    print(map_encoding_to_index(bs))
-raise Exception("PAUSE")
-"""
+### Calculate bitstring size
+boundary_list = utils.generate_boundary_list(searchspace)
+bsize = utils.calculate_bitstring_length(searchspace)
+print("Size of bitstring:", bsize)
+
+
+def map_listvariable_to_index(vec):
+    r"""For discrete categorical problems, bitstrings are implemented
+      as segments where one bit is active in each segment, and this bit
+      designates the parameter value for that variable."""
+    # Find indices of active bits:
+    indices = []
+    it = 0
+    for j, var in enumerate(vec):
+        vals = ssvalues[j]
+        for k, x in enumerate(vals):
+            if x == var:
+                indices.append(k+it)
+                break
+    multip = len(possible_xs)
+    index = 0
+    for i, key in enumerate(searchspace.keys()):
+        add = indices[i]
+        multip /= len(searchspace[key])
+        add *= multip
+        index += add
+    return int(index)
+
+fitness_func = lambda vec: fitness_values[map_listvariable_to_index(vec)]
 
 # Create discrete space class
 disc_space = utils.discrete_space(fitness_func, searchspace)
 
 ### Configure Local Search algorithm (RandomGreedy MLS in this case)
 iterations = 10000 # Max number of random restarts
-minmax = 1 # -1 for minimization problem, +1 for maximization problem
+minmax = -1 # -1 for minimization problem, +1 for maximization problem
 if minmax == 1:
     optfit = len(possible_xs)
 elif minmax == -1:
