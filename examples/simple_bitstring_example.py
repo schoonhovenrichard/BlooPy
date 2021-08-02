@@ -8,7 +8,7 @@ N = 20 # size of bitstring
 fitness_values = np.arange(1, 1 + 2**N)
 np.random.shuffle(fitness_values)
 fitness_func = lambda bs: fitness_values[ba2int(bs)]
-print("Size of search space:", len(fitness_values))
+print("Size of search space:", 2**N)
 
 # Configure Local Search algorithm (RandomGreedy MLS in this case)
 iterations = 10000 # Max number of random restarts

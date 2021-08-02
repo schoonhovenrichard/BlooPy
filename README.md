@@ -124,8 +124,6 @@ import selection_functions as sel
 
 random.seed(1234567)
 ```
-</details>
-
 
 Generate an adjacent or randomized MK function for testing. For this type of fitness function we have supplied a solver which uses dynamic programming.
 
