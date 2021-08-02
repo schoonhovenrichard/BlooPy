@@ -28,11 +28,10 @@ np.random.shuffle(fitness_values)
                 ls.append(k+it)
                 bs[k+it] = True
                 break
-### Calculate bitstring size
+# Calculate bitstring size
 boundary_list = utils.generate_boundary_list(searchspace)
 bsize = utils.calculate_bitstring_length(searchspace)
 print("Size of bitstring:", bsize)
-
 
 def map_listvariable_to_index(vec):
     r"""For discrete categorical problems, bitstrings are implemented
@@ -56,10 +55,13 @@ def map_listvariable_to_index(vec):
         index += add
     return int(index)
 
+# Map each entry to a unique index, which points to a random fitness value
 fitness_func = lambda vec: fitness_values[map_listvariable_to_index(vec)]
 
 # Create discrete space class
 disc_space = utils.discrete_space(fitness_func, searchspace)
+
+
 
 ### Configure Local Search algorithm (RandomGreedy MLS in this case)
 iterations = 10000 # Max number of random restarts

@@ -169,7 +169,10 @@ print("Best fitness:",x[0],", fraction of optimal {0:.4f}".format(x[0]/float(bes
 </details>
 
 <details>
-<summary><b>GA on bitstring randomized MK function</b></summary>
+<summary><b>Local search on categorical optimization problem</b></summary>
+Let's run a GreedyMLS algorithm on an example discrete categorical optimization problem. For this, we will use the ```utils.discrete_class``` class to map the categorical vectors to bitstring encoding automatically. Firstly, lets define some categorical search space and give each possibility a random fitness.
+
+```python
 import numpy as np
 from bitarray.util import ba2int
 import itertools as it
@@ -200,11 +203,11 @@ np.random.shuffle(fitness_values)
                 ls.append(k+it)
                 bs[k+it] = True
                 break
-### Calculate bitstring size
+
+# Calculate bitstring size
 boundary_list = utils.generate_boundary_list(searchspace)
 bsize = utils.calculate_bitstring_length(searchspace)
 print("Size of bitstring:", bsize)
-
 
 def map_listvariable_to_index(vec):
     r"""For discrete categorical problems, bitstrings are implemented
@@ -228,11 +231,16 @@ def map_listvariable_to_index(vec):
         index += add
     return int(index)
 
+# Map each entry to a unique index, which points to a random fitness value
 fitness_func = lambda vec: fitness_values[map_listvariable_to_index(vec)]
 
 # Create discrete space class
 disc_space = utils.discrete_space(fitness_func, searchspace)
+```
 
+Next, configure the Greedy local search algorithm and solve the problem.
+
+```python
 ### Configure Local Search algorithm (RandomGreedy MLS in this case)
 iterations = 10000 # Max number of random restarts
 minmax = -1 # -1 for minimization problem, +1 for maximization problem
@@ -254,6 +262,7 @@ best_fit, _, fevals = test_mls.solve(iterations,
             verbose=False)
 #            verbose=True)
 print("Best fitness found:", best_fit, "in", fevals, "evaluations | optimal fitness:", optfit)
+```
 </details>
 
 ### Back-end encoding solutions
