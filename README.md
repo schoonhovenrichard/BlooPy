@@ -1,4 +1,4 @@
-![Alt text](/imgs/bloopy_logo.pdf)
+![Alt text](/imgs/bloopy_logo.png)
 
 # BlooPy: Python library for black-box discrete optimization
 
