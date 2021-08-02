@@ -72,7 +72,9 @@ class pyswarms_pso(continuous_base):
             if bsstr in self.visited_cache:
                 fit = self.visited_cache[bsstr]
             else:
-                fit = fitness_func(float_indiv.bitstring)
+                # These optimizers do only minimization problems, for maximization,
+                #  we flip the fitness to negative for it to work.
+                fit = -1 * self.minmax * self.ffunc(float_indiv.bitstring)
                 self.nfeval += 1
                 self.visited_cache[bsstr] = fit
             fitnesses.append(fit)
@@ -125,16 +127,19 @@ class pyswarms_pso(continuous_base):
                 bsstr = float_indiv.bitstring.to01()
                 if bsstr in self.visited_cache:
                     fit = self.visited_cache[bsstr]
+                    # Because fitness is negative for maximization problems,
+                    #   this auto works
                     if best_fit is None or fit < best_fit:
                         best_fit = fit
                         best_part = x
                 else:
                     raise Exception("Whats going on here?")
+            # Because fitness is negative for maximization problems, this auto works
             if best_fit < final_best_cost:
                 solution = (best_fit, best_part)
             else:
                 solution = (final_best_cost, final_best_pos)
 
         float_indiv = continuous_individual(solution[1].tolist(), self.sspace, scaling=self.eps)
-        float_indiv.fitness = solution[0]
-        return (solution[0], float_indiv, self.nfeval)
+        float_indiv.fitness = -1 * self.minmax * solution[0]
+        return (float_indiv.fitness, float_indiv, self.nfeval)

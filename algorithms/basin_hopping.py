@@ -94,13 +94,15 @@ class basin_hopping(continuous_base):
         if bsstr in self.visited_cache:
             fit = self.visited_cache[bsstr]
         else:
+            # These optimizers do only minimization problems, for maximization,
+            #  we flip the fitness to negative for it to work.
             fit = -1 * self.minmax * self.ffunc(float_indiv.bitstring)
             self.nfeval += 1
             self.visited_cache[bsstr] = fit
-        if self.solution_fit is None or -1*self.minmax*self.solution_fit < -1*self.minmax*fit:
+        if self.solution_fit is None or fit < self.solution_fit:
             self.solution = y
             self.solution_fit = fit
-        if self.nfeval >= self.maxf or self.solution_fit*self.minmax <= -1*self.stopfit*self.minmax:
+        if self.nfeval >= self.maxf or self.solution_fit <= -1*self.minmax*self.stopfit:
             raise Exception("Callback to break computation Basin Hopping")
         return fit
 
