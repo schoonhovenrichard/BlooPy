@@ -1,3 +1,5 @@
+![plot](bloopy_logo.png)
+
 # BlooPy: Python library for black-box discrete optimization
 
 ## Installation
