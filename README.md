@@ -16,25 +16,17 @@
 <br>
 
 ## Installation
-Create conda environment:
+Install **BlooPy** by running
 ``` shell
-conda create -n bloopy
-conda activate bloopy 
+git clone https://github.com/schoonhovenrichard/BlooPy.git
+cd BlooPy/
+pip install -e . 
 ```
 
 ### Dependencies
 **BlooPy** requires the following packages to function:
 - bitarray
-
-which can be installed by:
-``` shell
-conda install -c anaconda bitarray 
-```
-
-Finally, install **BlooPy** by running
-``` shell
-pip install -e . 
-```
+- pyswarms
 
 ## Implemented algorithms
 ### Discrete local search algorithms
