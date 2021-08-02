@@ -1,11 +1,8 @@
 <p align="center">
   <br>
-  <a href="https://github.com/schoonhovenrichard/BlooPy"><img src="./imgs/bloopy_logo.png" height="280"></a>
+  <a href="https://github.com/schoonhovenrichard/BlooPy"><img src="./imgs/bloopy_logo.png" height="140"></a>
   <br>
 </p>
-
-
-![Alt text](/imgs/bloopy_logo.png)
 
 # BlooPy: Python library for black-box discrete optimization
 
