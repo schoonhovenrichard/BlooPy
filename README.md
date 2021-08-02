@@ -10,7 +10,7 @@
 ---
 
 <h2 align="center">
-  Fast black-box optimization for bitstring, categorial, and numerical discrete optimization problems with local, and population-based algorithms.
+  Black-box optimization for bitstring, categorial, and numerical discrete optimization problems with local, and population-based algorithms.
 </h2>
 
 <br>
