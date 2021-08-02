@@ -37,18 +37,18 @@ pip install -e .
 ```
 
 ## Implemented algorithms
-## Discrete local search algorithms
+### Discrete local search algorithms
 - Multi-start Local Search (4 different versions)
 - Iterative Local Search (4 different versions)
 - Tabu Search (2 different versions)
 - Simulated Annealing
 
-## Discrete population-based algorithms
+### Discrete population-based algorithms
 - Genetic Algorithm
 - Genetic Local Search
 - Linkage Tree Genetic Algorithm (and greedy version) [[1]](#1).
 
-## Continuous (real-valued) optimization algorithms
+### Continuous (real-valued) optimization algorithms
 - Dual Annealing
 - Particle Swarm Optimization
 - Basin Hopping
