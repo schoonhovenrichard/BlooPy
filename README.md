@@ -170,7 +170,7 @@ print("Best fitness:",x[0],", fraction of optimal {0:.4f}".format(x[0]/float(bes
 
 <details>
 <summary><b>Local search on categorical optimization problem</b></summary>
-Let's run a GreedyMLS algorithm on an example discrete categorical optimization problem. For this, we will use the ```utils.discrete_class``` class to map the categorical vectors to bitstring encoding automatically. Firstly, lets define some categorical search space and give each possibility a random fitness.
+Let's run a GreedyMLS algorithm on an example discrete categorical optimization problem. For this, we will use the ```utils.discrete_space``` class to map the categorical vectors to bitstring encoding automatically. Firstly, lets define some categorical search space and give each possibility a random fitness.
 
 ```python
 import numpy as np
