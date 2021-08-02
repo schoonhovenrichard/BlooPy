@@ -53,7 +53,7 @@ pip install -e .
 
 **BlooPy** is a fast discrete optimization package because it translates the optimization to a bitstring encoding, and uses efficient bitstring procedures implemented in C. 
 
-In addition to fitness functions of type "bitarray() --> float", **BlooPy** is also usable with fitness functions on discrete vectors "list[] --> float" or fitness dictionaries. The ```utils.discrete_space``` performs encoding automatically performs the translation from fitness dict or vector-based function to bitstring encoding for the use. See examples/example_discrete_space.py.
+In addition to fitness functions of type "bitarray() --> float", **BlooPy** is also usable with fitness functions on discrete vectors "list[] --> float" or fitness dictionaries. The ```utils.discrete_space``` translates fitness dict or vector-based function to bitstring encoding for the use. See examples/example_discrete_space.py.
 
 **BlooPy** allows users to assemble algorithms by passing components such as mutation functions, reproduction functions to the algorithm at initialization: 
 
@@ -66,10 +66,13 @@ selection_functions # Input: {list(individuals), list(individuals), float}. The 
 
 Additional components can easily be added by the user as long as the function has the same signature as specified.
 
-## Usage
+## Examples
 
 To learn more about the functionality of the package check out our
 examples folder. As a test suite, we have included code to generate adjacent, and randomized MK functions [[2]](#2). The examples folder contains scripts to test each algorithm on randomized MK functions. 
+
+<details open>
+<summary><b>Convex function</b></summary>
 
 Let's run a genetic algorithm (see examples/example_ga.py). Firstly, import the modules and set the seed for reproducibility:
 
@@ -133,11 +136,17 @@ x = test_ga.solve(min_variance=0.1,
 print("Best fitness:",x[0],", fraction of optimal {0:.4f}".format(x[0]/float(best_dp_fit)))
 ```
 
+</details>
+
+
 ### Back-end encoding solutions
-Here is some background information on how **BlooPy** operates. The algorithms are intended for discrete optimization problems, and they work on bitstrings. **BlooPy** implements two types of bitstring. 
+Some background information on how **BlooPy** operates: the algorithms are intended for discrete optimization problems, and they work on bitstrings. **BlooPy** implements two types of bitstring. 
 
 - Normal bitstrings which can take on any permutation. In this case, **BlooPy** creates ```individual(..., boundary_list=None)``` objects.
 - Bounded bitstrings where only a single 1 can be present in each segment. The segments are defined by supplying a list of start- and endpoints of the segments: ```individual(..., boundary_list=[(0,4),(5,7),(8,12),..])```.
+
+The first kind of bitstring is for bitstring based optimization problems. The second is used to encode finite discrete optimization problems. The bitstring is divided into segments with length equal to the number of parameter possibilities per variable. The i-th parameter value is selected by the bit that is turned on.
+
 - Real-valued solutions. Instead of a discrete solution, **BlooPy** supports continuous individuals which automatically take care of the conversion between the discrete optimization problem, and the continuous solver.
 
 Bounded bitstrings can be used when the optimization tasks is to find the optimal setttings when parameters which can each be selected from a finite list:
@@ -152,8 +161,6 @@ import individual as indiv
 
 candidate = indiv.individual(5, boundary_list=[(0,2),(3,4)])
 ```
-
-All the optimization algorithms will handle boundary lists properly as keyword arguments. If a boundary list is provided, the algorithms will only consider suitable candidates.
 
 ## Articles
 
