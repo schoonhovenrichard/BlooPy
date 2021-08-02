@@ -68,7 +68,7 @@ To learn more about the functionality of the package check out our
 examples folder. As a test suite, we have included code to generate adjacent, and randomized MK functions [[2]](#2). The examples folder contains scripts to test each algorithm on randomized MK functions. 
 
 <details open>
-<summary><b>GA on bitstring randomized MK function</b></summary>
+<summary><b>Simple local search on bitstring problem</b></summary>
 
 ```python
 import numpy as np
@@ -99,6 +99,7 @@ best_fit, _, fevals = test_mls.solve(iterations,
             verbose=True)
 print("Best fitness found:", best_fit, "in", fevals, "evaluations | optimal fitness:", 1)
 ```
+</details>
 
 <details>
 <summary><b>GA on bitstring randomized MK function</b></summary>
