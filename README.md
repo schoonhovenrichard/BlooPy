@@ -322,17 +322,16 @@ print("Best fitness found:", best_fit, "in", fevals, "evaluations | optimal fitn
 
 
 
-### Back-end encoding solutions
-Some background information on how **BlooPy** operates: the algorithms are intended for discrete optimization problems, and they work on bitstrings. **BlooPy** implements two types of bitstring. 
+<details>
+### Background on encoding solutions
+Some background information on how **BlooPy** operates: the algorithms are intended for discrete optimization problems, and they work on bitstrings. In principle, the user never has to interact with these bitstring directly. The algorithms create solutions in the shape of ```individual``` or ```continuous_individual``` classes. These handle most of the encoding. Furthermore, there are a number of helper classes and converter functions in ```utils.py``` (see Examples) meaning the user can call these to make their fitness functions or dictionaries usabl. **BlooPy** implements two types of bitstring. 
 
 - Normal bitstrings which can take on any permutation. In this case, **BlooPy** creates ```individual(..., boundary_list=None)``` objects.
 - Bounded bitstrings where only a single 1 can be present in each segment. The segments are defined by supplying a list of start- and endpoints of the segments: ```individual(..., boundary_list=[(0,4),(5,7),(8,12),..])```.
 
-The first kind of bitstring is for bitstring based optimization problems. The second is used to encode finite discrete optimization problems. The bitstring is divided into segments with length equal to the number of parameter possibilities per variable. The i-th parameter value is selected by the bit that is turned on.
+The first kind of bitstring is for bitstring based optimization problems. The second is used to encode finite discrete optimization problems. The bitstring is divided into segments with length equal to the number of parameter possibilities per variable. The i-th parameter value is selected by the bit that is turned on. So for variables ```x_i``` that take ```N_i``` values each, the lenght of the bitstring is ```N_1+N_2+...```. Note that the size of the searchspace is ```N_1*N_2*...``` so this is a relatively small encoding.
 
-- Real-valued solutions. Instead of a discrete solution, **BlooPy** supports continuous individuals which automatically take care of the conversion between the discrete optimization problem, and the continuous solver.
-
-Bounded bitstrings can be used when the optimization tasks is to find the optimal setttings when parameters which can each be selected from a finite list:
+Bounded bitstrings are used when the optimization tasks is to find the optimal setttings when parameters which can each be selected from a finite list (can be numerical or categorical), e.g.:
 
 ```python
 """Suppose that possible choices of a problem are to select (x,y) 
@@ -344,6 +343,10 @@ import individual as indiv
 
 candidate = indiv.individual(5, boundary_list=[(0,2),(3,4)])
 ```
+
+**Real-valued algorithms:** Instead of a discrete solution, **BlooPy** also supports continuous individuals which automatically take care of the conversion between the discrete optimization problem, and the continuous solver. This is done by mapping each variable uniformly onto [0,1]. This means that for each dimension, the interval [0,1] is divided into equal segments, and real-valued solutions snap to the nearest segment. This translates a real-valued solution to a discrete vector. Next, the usual encoding is used by **BlooPy** in the background to convert to bitstrings.
+
+</details>
 
 ## Articles
 
