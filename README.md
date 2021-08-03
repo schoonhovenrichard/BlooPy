@@ -321,9 +321,10 @@ print("Best fitness found:", best_fit, "in", fevals, "evaluations | optimal fitn
 </details>
 
 
+### Background on encoding solutions
 
 <details>
-### Background on encoding solutions
+<summary><b>Background information on how BlooPy operates on bitarrays</b></summary>
 Some background information on how **BlooPy** operates: the algorithms are intended for discrete optimization problems, and they work on bitstrings. In principle, the user never has to interact with these bitstring directly. The algorithms create solutions in the shape of ```individual``` or ```continuous_individual``` classes. These handle most of the encoding. Furthermore, there are a number of helper classes and converter functions in ```utils.py``` (see Examples) meaning the user can call these to make their fitness functions or dictionaries usabl. **BlooPy** implements two types of bitstring. 
 
 - Normal bitstrings which can take on any permutation. In this case, **BlooPy** creates ```individual(..., boundary_list=None)``` objects.
