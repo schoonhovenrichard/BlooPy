@@ -321,7 +321,7 @@ print("Best fitness found:", best_fit, "in", fevals, "evaluations | optimal fitn
 </details>
 
 
-### Background on encoding solutions
+## Background on encoding solutions
 
 <details>
 <summary><b>Background information on how BlooPy operates on bitarrays</b></summary>
