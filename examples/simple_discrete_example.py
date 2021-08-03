@@ -1,5 +1,4 @@
 import numpy as np
-from bitarray.util import ba2int
 import itertools as it
 
 import algorithms.local_search as mls
@@ -21,13 +20,6 @@ print("Size of search space:", len(possible_xs))
 fitness_values = np.arange(1, 1 + len(possible_xs))
 np.random.shuffle(fitness_values)
 
-    for j, var in enumerate(vec):
-        vals = ssvalues[j]
-        for k, x in enumerate(vals):
-            if x == var:
-                ls.append(k+it)
-                bs[k+it] = True
-                break
 # Calculate bitstring size
 boundary_list = utils.generate_boundary_list(searchspace)
 bsize = utils.calculate_bitstring_length(searchspace)
