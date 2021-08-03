@@ -171,7 +171,7 @@ print("Best fitness:",x[0],", fraction of optimal {0:.4f}".format(x[0]/float(bes
 <details>
 <summary><b>Local search on categorical optimization problem</b></summary>
 
-Let's run a GreedyMLS algorithm on an example discrete categorical optimization problem. For this, we will use the ```utils.discrete_space``` class to map the categorical vectors to bitstring encoding automatically. Firstly, lets define some categorical search space and give each possibility a random fitness.
+Let's run a GreedyMLS algorithm on an example discrete categorical optimization problem. For this, we will use the ```utils.discrete_space``` class to map the categorical vectors to bitstring encoding automatically. Firstly, lets define a class that takes some categorical search space and gives each possibility a random fitness.
 
 
 ```python
@@ -181,57 +181,68 @@ import itertools as it
 import algorithms.local_search as mls
 import utils
 
+class categorical_fitness:
+    def __init__(self, sspace):
+        self.sspace = sspace
+        self.ssvalues = list(self.sspace.values())#Shorthand
+
+        ### Give all possible (x1,x2,x3,x4) a random fitness value
+        var_names = sorted(self.sspace)
+        self.possible_xs = list(it.product(*(sspace[key] for key in var_names)))
+        print("Size of search space:", len(self.possible_xs))
+
+        # Define fitness function
+        self.fitness_values = np.arange(1, 1 + len(self.possible_xs))
+        np.random.shuffle(self.fitness_values)
+
+        # Calculate bitstring size
+        boundary_list = utils.generate_boundary_list(self.sspace)
+        self.bsize = utils.calculate_bitstring_length(self.sspace)
+        print("Size of bitstring:", self.bsize)
+
+    def map_listvariable_to_index(self, vec):
+        r"""For discrete categorical problems, bitstrings are implemented
+          as segments where one bit is active in each segment, and this bit
+          designates the parameter value for that variable."""
+        # Find indices of active bits:
+        indices = []
+        it = 0
+        for j, var in enumerate(vec):
+            vals = self.ssvalues[j]
+            for k, x in enumerate(vals):
+                if x == var:
+                    indices.append(k+it)
+                    break
+        multip = len(self.possible_xs)
+        index = 0
+        for i, key in enumerate(self.sspace.keys()):
+            add = indices[i]
+            multip /= len(self.sspace[key])
+            add *= multip
+            index += add
+        return int(index)
+
+    def fitness(self, vec):
+        # Map each entry to a unique index, which points to a random fitness value
+        return self.fitness_values[self.map_listvariable_to_index(vec)]
+```
+
+Next, define the categorial search space and use **BlooPy**'s converter ```utils.discrete_space```.
+
+```python
 ### Construct some categorical discrete space
 searchspace = {"x1": [1,2,3,4,5,6],
                "x2": ["foo", "bar"],
                "x3": [16, 32, 64, 128],
                "x4": ["a", "b", "c", "d", "e"]}
-ssvalues = list(searchspace.values())
 
-### Give all possible (x1,x2,x3,x4) a random fitness value
-var_names = sorted(searchspace)
-possible_xs = list(it.product(*(searchspace[key] for key in var_names)))
-print("Size of search space:", len(possible_xs))
-
-# Define fitness function
-fitness_values = np.arange(1, 1 + len(possible_xs))
-np.random.shuffle(fitness_values)
-
-# Calculate bitstring size
-boundary_list = utils.generate_boundary_list(searchspace)
-bsize = utils.calculate_bitstring_length(searchspace)
-print("Size of bitstring:", bsize)
-
-def map_listvariable_to_index(vec):
-    r"""For discrete categorical problems, bitstrings are implemented
-      as segments where one bit is active in each segment, and this bit
-      designates the parameter value for that variable."""
-    # Find indices of active bits:
-    indices = []
-    it = 0
-    for j, var in enumerate(vec):
-        vals = ssvalues[j]
-        for k, x in enumerate(vals):
-            if x == var:
-                indices.append(k+it)
-                break
-    multip = len(possible_xs)
-    index = 0
-    for i, key in enumerate(searchspace.keys()):
-        add = indices[i]
-        multip /= len(searchspace[key])
-        add *= multip
-        index += add
-    return int(index)
-
-# Map each entry to a unique index, which points to a random fitness value
-fitness_func = lambda vec: fitness_values[map_listvariable_to_index(vec)]
+categorical_fit = categorical_fitness(searchspace)
 
 # Create discrete space class
-disc_space = utils.discrete_space(fitness_func, searchspace)
+disc_space = utils.discrete_space(categorical_fit.fitness, searchspace)
 ```
 
-Next, configure the Greedy local search algorithm and solve the problem.
+Lastly, configure the Greedy local search algorithm and solve the problem.
 
 ```python
 ### Configure Local Search algorithm (RandomGreedy MLS in this case)
@@ -257,6 +268,61 @@ best_fit, _, fevals = test_mls.solve(iterations,
 print("Best fitness found:", best_fit, "in", fevals, "evaluations | optimal fitness:", optfit)
 ```
 </details>
+
+<details>
+<summary><b>Continuous dual annealing algorithm on categorical optimization problem</b></summary>
+
+To show case how continuous-based algorithms can be used, let's run Dual Annealing on the example categorical space from the last example. Firstly, lets import the class we used in the discrete example and define the discrete space.
+
+```python
+import numpy as np
+import itertools as it
+
+from simple_discrete_example import categorical_fitness
+import algorithms.dual_annealing as dsa
+import utils
+
+### Construct some categorical discrete space
+searchspace = {"x1": [1,2,3,4,5,6],
+               "x2": ["foo", "bar"],
+               "x3": [16, 32, 64, 128],
+               "x4": ["a", "b", "c", "d", "e"]}
+
+# Continuous algorithms require a search space to operate
+categorical_fit = categorical_fitness(searchspace)
+disc_space = utils.discrete_space(categorical_fit.fitness, searchspace)
+fitness_func = disc_space.fitness
+```
+
+Next, we simple configure the dual annealing algorithm and run it. The encoding for continuous real-valued solutions is automatically handled in the background by the ```individual.continuous_individual``` class in **BlooPy**.
+
+```python
+## Run dual annealing
+# supported_methods = ['COBYLA','L-BFGS-B','SLSQP','CG','Powell','Nelder-Mead', 'BFGS', 'trust-constr']
+method = "trust-constr"
+iterations = 10000
+minmax = -1 # -1 for minimization problem, +1 for maximization problem
+if minmax == 1:
+    optfit = len(categorical_fit.possible_xs)
+elif minmax == -1:
+    optfit = 1
+maxfeval = 100000 # Number of unique fitness queries MLS is allowed
+
+test_dsa = dsa.dual_annealing(fitness_func,
+        minmax,
+        searchspace,
+        method=method)
+
+best_fit, _, fevals = test_dsa.solve(max_iter=iterations,
+            max_time=10,#seconds
+            stopping_fitness=optfit,
+            max_funcevals=maxfeval)
+print("Best fitness found:", best_fit, "in", fevals, "evaluations | optimal fitness:", optfit)
+```
+
+</details>
+
+
 
 ### Back-end encoding solutions
 Some background information on how **BlooPy** operates: the algorithms are intended for discrete optimization problems, and they work on bitstrings. **BlooPy** implements two types of bitstring. 

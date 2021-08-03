@@ -39,8 +39,6 @@ searchspace = utils.create_bitstring_searchspace(m)
 converter = utils.bitstring_as_discrete(searchspace, mk_func.get_fitness)
 fitness_func = converter.get_fitness
 
-# Define the Basin Hopping algorithm
-
 count = 1
 for vals in searchspace.values():
     count *= len(vals)
