@@ -14,7 +14,6 @@ searchspace = {"x1": [1,2,3,4,5,6],
 # Continuous algorithms require a search space to operate
 categorical_fit = categorical_fitness(searchspace)
 disc_space = utils.discrete_space(categorical_fit.fitness, searchspace)
-fitness_func = disc_space.fitness
 
 
 ## Run dual annealing
@@ -28,7 +27,7 @@ elif minmax == -1:
     optfit = 1
 maxfeval = 100000 # Number of unique fitness queries MLS is allowed
 
-test_dsa = dsa.dual_annealing(fitness_func,
+test_dsa = dsa.dual_annealing(disc_space.fitness,
         minmax,
         searchspace,
         method=method)

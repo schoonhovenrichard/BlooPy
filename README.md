@@ -196,7 +196,6 @@ class categorical_fitness:
         np.random.shuffle(self.fitness_values)
 
         # Calculate bitstring size
-        boundary_list = utils.generate_boundary_list(self.sspace)
         self.bsize = utils.calculate_bitstring_length(self.sspace)
         print("Size of bitstring:", self.bsize)
 
@@ -204,7 +203,8 @@ class categorical_fitness:
         r"""For discrete categorical problems, bitstrings are implemented
           as segments where one bit is active in each segment, and this bit
           designates the parameter value for that variable."""
-        # Find indices of active bits:
+        # This function looks complicated, but it merely uniquely maps each
+	#  possible vector to an index to get a random fitness value.
         indices = []
         it = 0
         for j, var in enumerate(vec):
@@ -249,13 +249,13 @@ Lastly, configure the Greedy local search algorithm and solve the problem.
 iterations = 10000 # Max number of random restarts
 minmax = -1 # -1 for minimization problem, +1 for maximization problem
 if minmax == 1:
-    optfit = len(possible_xs)
+    optfit = len(categorical_fit.possible_xs)
 elif minmax == -1:
     optfit = 1
 maxfeval = 100000 # Number of unique fitness queries MLS is allowed
 
 test_mls = mls.RandomGreedyMLS(disc_space.fitness,
-        bsize,
+        categorical_fit.bsize,
         minmax,
         searchspace=searchspace)
 
@@ -263,8 +263,7 @@ best_fit, _, fevals = test_mls.solve(iterations,
             max_time=10,#seconds
             stopping_fitness=optfit,#1 is optimal value so we can stop
             max_funcevals=maxfeval,
-            verbose=False)
-#            verbose=True)
+            verbose=True)
 print("Best fitness found:", best_fit, "in", fevals, "evaluations | optimal fitness:", optfit)
 ```
 </details>
@@ -291,7 +290,6 @@ searchspace = {"x1": [1,2,3,4,5,6],
 # Continuous algorithms require a search space to operate
 categorical_fit = categorical_fitness(searchspace)
 disc_space = utils.discrete_space(categorical_fit.fitness, searchspace)
-fitness_func = disc_space.fitness
 ```
 
 Next, we simple configure the dual annealing algorithm and run it. The encoding for continuous real-valued solutions is automatically handled in the background by the ```individual.continuous_individual``` class in **BlooPy**.
@@ -308,7 +306,7 @@ elif minmax == -1:
     optfit = 1
 maxfeval = 100000 # Number of unique fitness queries MLS is allowed
 
-test_dsa = dsa.dual_annealing(fitness_func,
+test_dsa = dsa.dual_annealing(disc_space.fitness,
         minmax,
         searchspace,
         method=method)

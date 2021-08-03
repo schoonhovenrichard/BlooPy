@@ -19,7 +19,6 @@ class categorical_fitness:
         np.random.shuffle(self.fitness_values)
 
         # Calculate bitstring size
-        boundary_list = utils.generate_boundary_list(self.sspace)
         self.bsize = utils.calculate_bitstring_length(self.sspace)
         print("Size of bitstring:", self.bsize)
 
@@ -27,7 +26,8 @@ class categorical_fitness:
         r"""For discrete categorical problems, bitstrings are implemented
           as segments where one bit is active in each segment, and this bit
           designates the parameter value for that variable."""
-        # Find indices of active bits:
+        # This function looks complicated, but it merely uniquely maps each
+        #  possible vector to an index to get a random fitness value.
         indices = []
         it = 0
         for j, var in enumerate(vec):
