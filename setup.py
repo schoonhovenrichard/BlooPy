@@ -18,7 +18,7 @@ setup(
     version = '0.1',  # Ideally should be same as your GitHub release tag varsion
     description = 'BlooPy: Black-box optimization Python for bitstring, categorical, and numerical discrete problems with local, and population-based algorithms.',
     author = 'Richard Schoonhoven',
-    author_email = '',
+    author_email = 'r.a.schoonhoven@hotmail.com',
     url = 'https://github.com/schoonhovenrichard/BlooPy',
     download_url = 'https://github.com/schoonhovenrichard/BlooPy/archive/refs/tags/0.1.tar.gz',
     keywords = ["auto-tuning","optimization","gradient-free","black-box","computing","algorithms","discrete","minimization","maximization","evolutionary","fitness"],
