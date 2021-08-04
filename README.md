@@ -24,7 +24,7 @@ pip install -e .
 ```
 
 ### Dependencies
-**BlooPy** requires the following packages to function:
+**BlooPy** install the following dependencies:
 - bitarray
 - pyswarms
 
