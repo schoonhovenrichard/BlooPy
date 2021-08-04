@@ -1,6 +1,6 @@
 <p align="center">
   <br>
-  <a href="https://github.com/schoonhovenrichard/BlooPy"><img src="./imgs/bloopy_logo2.png" height="300"></a>
+  <a href="https://github.com/schoonhovenrichard/BlooPy"><img src="./imgs/bloopy_logo3.png" height="300"></a>
   <br>
 </p>
 
