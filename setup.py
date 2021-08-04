@@ -14,7 +14,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'BlooPy',
-    packages = ['bloopy'],
+    packages=find_packages(),
     version = '0.1',  # Ideally should be same as your GitHub release tag varsion
     description = 'BlooPy: Black-box optimization Python for bitstring, categorical, and numerical discrete problems with local, and population-based algorithms.',
     author = 'Richard Schoonhoven',
