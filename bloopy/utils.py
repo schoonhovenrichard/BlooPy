@@ -127,6 +127,16 @@ def calculate_bitstring_length(sspace):
         bsize += len(sspace[key])
     return bsize
 
+def set_bitstring(sol, arr):
+    if sol.boundary_list is None:
+        raise Exception("Method not implemented for standard bitstrings")
+    if len(arr) != len(sol.boundary_list):
+        raise Exception("Invalid settings for bitstring given!")
+    indices = [i for i, x in enumerate(list(sol.bitstring)) if x]
+    for k in range(len(arr)):
+        sol.bitstring[indices[k]] = 0 # Set old one to 0
+        sol.bitstring[arr[k]] = 1 # set new one to 1
+
 def generate_population(population_size, ffunc, sspace):
     splits = generate_boundary_list(sspace)
     input_pop = []

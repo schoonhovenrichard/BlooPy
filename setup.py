@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name = 'bloopy',
     packages=find_packages(),
-    version = '0.2',  # Ideally should be same as your GitHub release tag varsion
+    version = '0.3',  # Ideally should be same as your GitHub release tag varsion
     description = 'BlooPy: Black-box optimization Python for bitstring, categorical, and numerical discrete problems with local, and population-based algorithms.',
     author = 'Richard Schoonhoven',
     author_email = 'r.a.schoonhoven@hotmail.com',
@@ -15,5 +15,6 @@ setup(
         'numpy>=1.19.0',
         'scipy>=1.6.0',
         'bitarray',
-        'pyswarms'],
+        'pyswarms',
+        'networkx'],
 )

@@ -26,9 +26,10 @@ git clone https://github.com/schoonhovenrichard/BlooPy.git
 ```
 
 ### Dependencies
-**BlooPy** install the following dependencies:
+**BlooPy** installs the following dependencies:
 - bitarray
 - pyswarms
+- networkx
 
 ## Implemented algorithms
 ### Discrete local search algorithms
