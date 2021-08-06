@@ -16,7 +16,10 @@
 <br>
 
 ## Installation
-Install **BlooPy** by running
+[![PyPI version](https://badge.fury.io/py/bloopy.svg)](https://badge.fury.io/py/bloopy)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5167384.svg)](https://doi.org/10.5281/zenodo.5167384)
+
+The most recent version of **BlooPy** is available on PyPi, install it by running:
 ``` shell
 pip install bloopy 
 ```
@@ -378,7 +381,6 @@ If you find our work useful, please cite as:
 ## Contribute
 
 Contributions are always welcome! Please submit pull requests against the ```master``` branch.
-Please read the [contribution guidelines](contributing.md) first.
 
 ## References
 <a id="1">[1]</a> 
