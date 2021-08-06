@@ -360,7 +360,20 @@ candidate = indiv.individual(5, boundary_list=[(0,2),(3,4)])
 * **Richard Schoonhoven** - *Initial work*
 
 ## Cite
-TODO, zenodo reference?
+If you find our work useful, please cite as:
+
+```
+@software{schoonhoven-2021-bloopy,
+  author       = {Schoonhoven, Richard A.},
+  title        = {rschoonhoven/BlooPy: v0.3},
+  month        = aug,
+  year         = 2021,
+  publisher    = {Zenodo},
+  version      = {v0.3},
+  doi          = {10.5281/zenodo.5167384},
+  url          = {https://doi.org/10.5281/zenodo.5167384}
+}
+```
 
 ## Contribute
 
