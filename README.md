@@ -18,9 +18,11 @@
 ## Installation
 Install **BlooPy** by running
 ``` shell
+pip install bloopy 
+```
+The examples in the ```examples/``` folder are not part of the PyPi package. To access them, run
+``` shell
 git clone https://github.com/schoonhovenrichard/BlooPy.git
-cd BlooPy/
-pip install -e . 
 ```
 
 ### Dependencies
