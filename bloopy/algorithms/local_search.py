@@ -36,7 +36,6 @@ class multi_start_local_search_base:
         self.best_candidate = None
         self.current_candidate = None
         self.func_evals = 0
-        self.cumulative_fit = 0
         self.visited_cache = dict()
         if neighbour not in ['Hamming', 'adjacent']:
             raise Exception("Unknown implementation for neighbouring solutions")
@@ -54,7 +53,6 @@ class multi_start_local_search_base:
         else:
             self.current_candidate.fitness = self.ffunc(self.current_candidate.bitstring)
             self.func_evals += 1
-            self.cumulative_fit += self.current_candidate.fitness
             self.visited_cache[bsstr] = self.current_candidate.fitness
         self.hillclimb_candidate(maxfeval)
         if self.best_candidate is None or self.best_candidate.fitness*self.minmax < self.current_candidate.fitness*self.minmax:
@@ -95,8 +93,6 @@ class multi_start_local_search_base:
             best_fit (float): Best fitness reached.
             self.best_candidate (individual): Best individual found.
             self.func_evals (int): Total number of Fevals performed.
-            self.cumulative_fit (float): Cumulative fitness of all
-                fitness function evaluations.
         """
         nonterminate = True
         begintime = timer()
@@ -157,9 +153,8 @@ class OrderedGreedyMLS(multi_start_local_search_base):
         self.order = order
 
     def hillclimb_candidate(self, maxfeval):
-        self.current_candidate, extra_fevals, totfit, self.visited_cache = hillclimb.OrderedGreedyHillclimb(self.current_candidate, self.ffunc, self.minmax, self.func_evals, maxfeval, self.visited_cache, self.nbour_method, self.order, restart=self.restart)
+        self.current_candidate, extra_fevals, self.visited_cache = hillclimb.OrderedGreedyHillclimb(self.current_candidate, self.ffunc, self.minmax, self.func_evals, maxfeval, self.visited_cache, self.nbour_method, self.order, restart=self.restart)
         self.func_evals += extra_fevals
-        self.cumulative_fit += totfit
 
 class RandomGreedyMLS(multi_start_local_search_base):
     def __init__(self, fitness_function, bitstring_size, minmax_problem, searchspace=None, neighbour='Hamming', restart_search=True):
@@ -182,9 +177,8 @@ class RandomGreedyMLS(multi_start_local_search_base):
         self.restart = restart_search
     
     def hillclimb_candidate(self, maxfeval):
-        self.current_candidate, extra_fevals, totfit, self.visited_cache = hillclimb.RandomGreedyHillclimb(self.current_candidate, self.ffunc, self.minmax, self.func_evals, maxfeval, self.visited_cache, self.nbour_method, restart=self.restart)
+        self.current_candidate, extra_fevals, self.visited_cache = hillclimb.RandomGreedyHillclimb(self.current_candidate, self.ffunc, self.minmax, self.func_evals, maxfeval, self.visited_cache, self.nbour_method, restart=self.restart)
         self.func_evals += extra_fevals
-        self.cumulative_fit += totfit
 
 class BestMLS(multi_start_local_search_base):
     def __init__(self, fitness_function, bitstring_size, minmax_problem, searchspace=None, neighbour='Hamming'):
@@ -204,9 +198,8 @@ class BestMLS(multi_start_local_search_base):
         super().__init__(fitness_function, bitstring_size, minmax_problem, searchspace=searchspace, neighbour=neighbour)
 
     def hillclimb_candidate(self, maxfeval):
-        self.current_candidate, extra_fevals, totfit, self.visited_cache = hillclimb.BestHillclimb(self.current_candidate, self.ffunc, self.minmax, self.func_evals, maxfeval, self.visited_cache, self.nbour_method)
+        self.current_candidate, extra_fevals, self.visited_cache = hillclimb.BestHillclimb(self.current_candidate, self.ffunc, self.minmax, self.func_evals, maxfeval, self.visited_cache, self.nbour_method)
         self.func_evals += extra_fevals
-        self.cumulative_fit += totfit
 
 class StochasticMLS(multi_start_local_search_base):
     def __init__(self, fitness_function, bitstring_size, minmax_problem, searchspace=None, neighbour='Hamming'):
@@ -228,6 +221,5 @@ class StochasticMLS(multi_start_local_search_base):
         super().__init__(fitness_function, bitstring_size, minmax_problem, searchspace=searchspace, neighbour=neighbour)
 
     def hillclimb_candidate(self, maxfeval):
-        self.current_candidate, extra_fevals, totfit, self.visited_cache = hillclimb.StochasticHillclimb(self.current_candidate, self.ffunc, self.minmax, self.func_evals, maxfeval, self.visited_cache, self.nbour_method)
+        self.current_candidate, extra_fevals, self.visited_cache = hillclimb.StochasticHillclimb(self.current_candidate, self.ffunc, self.minmax, self.func_evals, maxfeval, self.visited_cache, self.nbour_method)
         self.func_evals += extra_fevals
-        self.cumulative_fit += totfit

@@ -8,7 +8,7 @@ setup(
     author = 'Richard Schoonhoven',
     author_email = 'r.a.schoonhoven@hotmail.com',
     url = 'https://github.com/schoonhovenrichard/BlooPy',
-    download_url = 'https://github.com/schoonhovenrichard/BlooPy/archive/refs/tags/0.3.tar.gz',
+    download_url = 'https://github.com/schoonhovenrichard/BlooPy/archive/refs/tags/0.4.tar.gz',
     keywords = ["auto-tuning","optimization","gradient-free","black-box","computing","algorithms","discrete","minimization","maximization","evolutionary","fitness"],
     classifiers = [],
     install_requires=[

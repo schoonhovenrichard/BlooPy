@@ -64,7 +64,6 @@ class genetic_algorithm:
             self.boundary_list = utils.generate_boundary_list(searchspace)
         self.visited_cache = dict()
         self.func_evals = 0
-        self.cumulative_fit = 0
         if mutation is not None:
             self.mutation = max(1, int(self.bs_size * mutation))
         else:
@@ -90,7 +89,6 @@ class genetic_algorithm:
             else:
                 pop[i].fitness = self.ffunc(pop[i].bitstring)
                 self.visited_cache[bsstr] = pop[i].fitness
-                self.cumulative_fit += pop[i].fitness
                 self.func_evals += 1
 
     def generate_random_pop(self):
@@ -105,7 +103,6 @@ class genetic_algorithm:
                 new_specimen.fitness = self.visited_cache[bsstr]
             else:
                 new_specimen.fitness = self.ffunc(new_specimen.bitstring)
-                self.cumulative_fit += new_specimen.fitness
                 self.func_evals += 1
                 self.visited_cache[bsstr] = new_specimen.fitness
             self.current_pop.append(new_specimen)
@@ -221,8 +218,6 @@ class genetic_algorithm:
             best_gen_so_far (int): Generation when best was found.
             variance (float):  Termination variance of population.
             self.func_evals (int): Total number of Fevals performed.
-            self.cumulative_fit (float): Cumulative fitness of all
-                fitness function evaluations.
         """
         generation = 0
         best_fit = self.current_best().fitness
@@ -277,4 +272,4 @@ class genetic_algorithm:
 
         if verbose:
             print("Terminated after {0} generations with best fitness: {1:.3f} | # of fitness evals: {2}".format(generation, best_fit, self.func_evals))
-        return (best_fit, self.current_best(), best_gen_so_far, variance, self.func_evals, self.cumulative_fit)
+        return (best_fit, self.current_best(), best_gen_so_far, variance, self.func_evals)

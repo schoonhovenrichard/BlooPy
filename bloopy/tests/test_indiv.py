@@ -6,6 +6,11 @@ import numpy as np
 
 import bloopy.individual as indiv
 
+#TODO: Check size function in continuous individual
+#TODO: Check float solution function in continuous individual
+#TODO: Fix all the docstrings
+#TODO: Test for each algorithm (min and max both)
+
 @given(st.integers(min_value=1, max_value=1e6))
 @settings()
 def test_individual_hypo_check_size(size):
@@ -98,10 +103,6 @@ def test_cont_individual_size(tries=10):
         temp = indiv.continuous_individual(vector, searchspace)
         siz = len(temp.bitstring)
         assert siz == size, "Failed test individual: incorrect bitstring size"
-
-#TODO: Check size function in continuous individual
-#TODO: Check float solution function in continuous individual
-#TODO: Fix all the docstrings
 
 if __name__ == '__main__':
     test_individual_generate_random_with_bound()

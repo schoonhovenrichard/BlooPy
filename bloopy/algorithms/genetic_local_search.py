@@ -68,12 +68,10 @@ class genetic_local_search(genetic_algorithm):
             else:
                 children[i].fitness = self.ffunc(children[i].bitstring)
                 self.visited_cache[bsstr] = children[i].fitness
-                self.cumulative_fit += children[i].fitness
                 self.func_evals += 1
 
-            children[i], feval, tot_fit, self.visited_cache = self.hillclimber(children[i], self.ffunc, self.minmax, self.func_evals, self.maxfeval, self.visited_cache, self.nbour_method)
+            children[i], feval, self.visited_cache = self.hillclimber(children[i], self.ffunc, self.minmax, self.func_evals, self.maxfeval, self.visited_cache, self.nbour_method)
             self.func_evals += feval
-            self.cumulative_fit += tot_fit
 
         # Selection step
         self.current_pop = self.selector(parents, children, self.minmax)

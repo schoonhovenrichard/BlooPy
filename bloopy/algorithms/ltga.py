@@ -135,7 +135,6 @@ class ltga(genetic_algorithm):
             linbs = self.cast_to_linear(sol.bitstring)
             sol.fitness = self.ffunc(linbs)
             self.visited_cache[bsstr] = sol.fitness
-            self.cumulative_fit += sol.fitness
             self.func_evals += 1
 
     def set_fitness(self, sol):
@@ -145,7 +144,6 @@ class ltga(genetic_algorithm):
         else:
             sol.fitness = self.ffunc(sol.bitstring)
             self.visited_cache[bsstr] = sol.fitness
-            self.cumulative_fit += sol.fitness
             self.func_evals += 1
 
     def one_generation(self):

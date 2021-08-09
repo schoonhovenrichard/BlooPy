@@ -33,6 +33,8 @@ git clone https://github.com/schoonhovenrichard/BlooPy.git
 - bitarray
 - pyswarms
 - networkx
+- pytest
+- hypothesis
 
 ## Implemented algorithms
 ### Discrete local search algorithms

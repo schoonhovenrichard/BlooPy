@@ -12,7 +12,6 @@ def RandomGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited
     splits = candidate.boundary_list
     foundimprove = True
     func_evals = 0
-    total_fit = 0
     bs_size = candidate.size
     while foundimprove:
         child = individual(candidate.size, bitstring=copy.deepcopy(candidate.bitstring), boundary_list=splits)
@@ -34,7 +33,6 @@ def RandomGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited
                     child.fitness = ffunc(child.bitstring)
                     visited_cache[bsstr] = child.fitness
                     func_evals += 1
-                    total_fit += child.fitness
                 if minmax * child.fitness > minmax * candidate.fitness:
                     candidate = copy.deepcopy(child)
                     foundimprove = True
@@ -71,7 +69,6 @@ def RandomGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited
                         child.fitness = ffunc(child.bitstring)
                         visited_cache[bsstr] = child.fitness
                         func_evals += 1
-                        total_fit += child.fitness
                     if minmax * child.fitness > minmax * candidate.fitness:
                         candidate = copy.deepcopy(child)
                         indices[k] = i
@@ -84,7 +81,7 @@ def RandomGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited
                         child.fitness = candidate.fitness
                 if foundimprove and restart:
                     break
-    return candidate, func_evals, total_fit, visited_cache
+    return candidate, func_evals, visited_cache
 
 def OrderedGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, nbour_method, order, restart=True):
     if nbour_method not in ["Hamming", "adjacent"]:
@@ -92,7 +89,6 @@ def OrderedGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visite
     splits = candidate.boundary_list
     foundimprove = True
     func_evals = 0
-    total_fit = 0
     bs_size = candidate.size
     while foundimprove:
         child = individual(candidate.size, bitstring=copy.deepcopy(candidate.bitstring), boundary_list=splits)
@@ -115,7 +111,6 @@ def OrderedGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visite
                     child.fitness = ffunc(child.bitstring)
                     visited_cache[bsstr] = child.fitness
                     func_evals += 1
-                    total_fit += child.fitness
                 if minmax * child.fitness > minmax * candidate.fitness:
                     candidate = copy.deepcopy(child)
                     foundimprove = True
@@ -154,7 +149,6 @@ def OrderedGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visite
                         child.fitness = ffunc(child.bitstring)
                         visited_cache[bsstr] = child.fitness
                         func_evals += 1
-                        total_fit += child.fitness
                     if minmax * child.fitness > minmax * candidate.fitness:
                         candidate = copy.deepcopy(child)
                         indices[k] = i
@@ -167,7 +161,7 @@ def OrderedGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visite
                         child.fitness = candidate.fitness
                 if foundimprove and restart:
                     break
-    return candidate, func_evals, total_fit, visited_cache
+    return candidate, func_evals, visited_cache
 
 def BestHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, nbour_method):
     if nbour_method not in ["Hamming", "adjacent"]:
@@ -175,7 +169,6 @@ def BestHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, 
     splits = candidate.boundary_list
     foundimprove = True
     func_evals = 0
-    total_fit = 0
     bs_size = candidate.size
     while foundimprove:
         child = individual(candidate.size, bitstring=copy.deepcopy(candidate.bitstring), boundary_list=splits)
@@ -196,7 +189,6 @@ def BestHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, 
                     child.fitness = ffunc(child.bitstring)
                     visited_cache[bsstr] = child.fitness
                     func_evals += 1
-                    total_fit += child.fitness
 
                 #If a neighbour is better, than the best found neighbours, save it
                 if minmax * child.fitness > minmax * best_child.fitness:
@@ -236,7 +228,6 @@ def BestHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, 
                         child.fitness = ffunc(child.bitstring)
                         visited_cache[bsstr] = child.fitness
                         func_evals += 1
-                        total_fit += child.fitness
 
                     #If a neighbour is better, than the best found neighbours, save it
                     if minmax * child.fitness > minmax * best_child.fitness:
@@ -250,7 +241,7 @@ def BestHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, 
             if minmax * best_child.fitness > minmax * candidate.fitness:
                 foundimprove = True
                 candidate = copy.deepcopy(best_child)
-    return candidate, func_evals, total_fit, visited_cache
+    return candidate, func_evals, visited_cache
 
 def StochasticHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, nbour_method):
     if nbour_method not in ["Hamming", "adjacent"]:
@@ -258,7 +249,6 @@ def StochasticHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_c
     splits = candidate.boundary_list
     foundimprove = True
     func_evals = 0
-    total_fit = 0
     bs_size = candidate.size
     while foundimprove:
         if maxfeval is not None and totfevals >= maxfeval:
@@ -280,7 +270,6 @@ def StochasticHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_c
                     child.fitness = ffunc(child.bitstring)
                     visited_cache[bsstr] = child.fitness
                     func_evals += 1
-                    total_fit += child.fitness
 
                 if minmax * child.fitness > minmax * candidate.fitness:
                     improved_candidate = copy.deepcopy(child)
@@ -314,7 +303,6 @@ def StochasticHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_c
                         child.fitness = ffunc(child.bitstring)
                         visited_cache[bsstr] = child.fitness
                         func_evals += 1
-                        total_fit += child.fitness
                     if minmax * child.fitness > minmax * candidate.fitness:
                         improved_candidate = copy.deepcopy(child)
                         uphill_moves.append((improved_candidate, abs(child.fitness-candidate.fitness)))
@@ -328,4 +316,4 @@ def StochasticHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_c
             # Choose a random uphill move proportionate to fitness increase
             index = np.random.choice(range(len(uphill_moves)),size=(1,),p=(np.array(probs)/float(sum(probs))).tolist())[0]
             candidate = copy.deepcopy(uphill_moves[index][0])
-    return candidate, func_evals, total_fit, visited_cache
+    return candidate, func_evals, visited_cache

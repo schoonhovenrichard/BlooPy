@@ -45,7 +45,6 @@ class BestTabu(multi_start_local_search_base):
                 self.current_candidate.fitness = self.ffunc(self.current_candidate.bitstring)
                 self.visited_cache[bsstr] = self.current_candidate.fitness
                 self.func_evals += 1
-                self.cumulative_fit += self.current_candidate.fitness
             if self.best_candidate is None or self.best_candidate.fitness*self.minmax < self.current_candidate.fitness*self.minmax:
                 self.best_candidate = copy.deepcopy(self.current_candidate)
 
@@ -71,7 +70,6 @@ class BestTabu(multi_start_local_search_base):
                     neighbor.fitness = self.ffunc(neighbor.bitstring)
                     self.visited_cache[bsstr] = neighbor.fitness
                     self.func_evals += 1
-                    self.cumulative_fit += neighbor.fitness
 
                 if best_neighbor is None:
                     best_neighbor = copy.deepcopy(neighbor)
@@ -113,7 +111,6 @@ class BestTabu(multi_start_local_search_base):
                         neighbor.fitness = self.ffunc(neighbor.bitstring)
                         self.visited_cache[bsstr] = neighbor.fitness
                         self.func_evals += 1
-                        self.cumulative_fit += neighbor.fitness
 
                     if best_neighbor is None:
                         best_neighbor = copy.deepcopy(neighbor)
@@ -134,7 +131,6 @@ class BestTabu(multi_start_local_search_base):
                 best_neighbor.fitness = self.ffunc(best_neighbor.bitstring)
                 self.visited_cache[bsstr] = best_neighbor.fitness
                 self.func_evals += 1
-                self.cumulative_fit += best_neighbor.fitness
 
         # We always set the best neighbour as current candidate, even if its worse
         self.tabu_list.append(best_neighbor.bitstring)
@@ -177,7 +173,6 @@ class RandomGreedyTabu(multi_start_local_search_base):
                 self.current_candidate.fitness = self.ffunc(self.current_candidate.bitstring)
                 self.visited_cache[bsstr] = self.current_candidate.fitness
                 self.func_evals += 1
-                self.cumulative_fit += self.current_candidate.fitness
             if self.best_candidate is None or self.best_candidate.fitness*self.minmax < self.current_candidate.fitness*self.minmax:
                 self.best_candidate = copy.deepcopy(self.current_candidate)
 
@@ -205,7 +200,6 @@ class RandomGreedyTabu(multi_start_local_search_base):
                     neighbor.fitness = self.ffunc(neighbor.bitstring)
                     self.visited_cache[bsstr] = neighbor.fitness
                     self.func_evals += 1
-                    self.cumulative_fit += neighbor.fitness
 
                 # If we improved, immediately return
                 if self.minmax*neighbor.fitness > self.minmax*self.current_candidate.fitness:
@@ -258,7 +252,6 @@ class RandomGreedyTabu(multi_start_local_search_base):
                         neighbor.fitness = self.ffunc(neighbor.bitstring)
                         self.visited_cache[bsstr] = neighbor.fitness
                         self.func_evals += 1
-                        self.cumulative_fit += neighbor.fitness
 
                     # If we improved, immediately return
                     if self.minmax*neighbor.fitness > self.minmax*self.current_candidate.fitness:
@@ -288,7 +281,6 @@ class RandomGreedyTabu(multi_start_local_search_base):
                 best_neighbor.fitness = self.ffunc(best_neighbor.bitstring)
                 self.visited_cache[bsstr] = best_neighbor.fitness
                 self.func_evals += 1
-                self.cumulative_fit += best_neighbor.fitness
 
         # We always set the best neighbour as current candidate, even if its worse
         self.tabu_list.append(best_neighbor.bitstring)

@@ -135,7 +135,6 @@ class discrete_diffevo(genetic_algorithm):
             else:
                 bprime.fitness = self.ffunc(bprime.bitstring)
                 self.visited_cache[bsstr] = bprime.fitness
-                self.cumulative_fit += bprime.fitness
                 self.func_evals += 1
 
             # If better, replace candidate
@@ -227,7 +226,6 @@ class discrete_diffevo(genetic_algorithm):
             else:
                 bprime.fitness = self.ffunc(bprime.bitstring)
                 self.visited_cache[bsstr] = bprime.fitness
-                self.cumulative_fit += bprime.fitness
                 self.func_evals += 1
 
             # If better, replace candidate
