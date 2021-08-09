@@ -1,7 +1,6 @@
 import numpy as np
 
 import bloopy.utils as utils
-#import fitness_functions as ff
 
 def bruteforce_MK_solve(mk_func):
     r"""

@@ -1,9 +1,10 @@
 import pytest
-import dynamic_programming as dp 
 import random
-import fitness_functions as ff
 from hypothesis import given, settings
 import hypothesis.strategies as st
+
+import fitness_functions as ff
+import dynamic_programming as dp 
 
 @given(st.integers(min_value=2, max_value=6))
 @settings(deadline=1000)

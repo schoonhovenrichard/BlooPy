@@ -44,7 +44,7 @@ class individual:
             self.bitstring = bitarray(tup.tolist())
             self.fitness = None
         else:
-            arr = np.zeros(shape=(self.size,), dtype=np.bool)
+            arr = np.zeros(shape=(self.size,), dtype=bool)
             for lb, ub in self.boundary_list:
                 pos = random.randint(lb, ub)
                 arr[pos] = True

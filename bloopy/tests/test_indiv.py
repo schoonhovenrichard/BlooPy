@@ -2,8 +2,9 @@ import pytest
 from hypothesis import given, settings, assume
 import hypothesis.strategies as st
 import random
-import individual as indiv
 import numpy as np
+
+import bloopy.individual as indiv
 
 @given(st.integers(min_value=1, max_value=1e6))
 @settings()
@@ -17,11 +18,11 @@ def test_individual_hypo_check_size(size):
 def test_individual_hypo_generate_random_no_bound(size):
     # This is difficult to check, we look at the statistics of each bit
     eps = 0.1
-    stats = np.zeros(shape=(size,),dtype=np.float)
+    stats = np.zeros(shape=(size,),dtype=float)
     runs = size*100
     for t in range(runs):
         temp = indiv.individual(size)
-        bstr = np.array(temp.bitstring.tolist(True))
+        bstr = np.array(temp.bitstring.tolist())
         stats += bstr
     stats = stats/float(runs)
     assert max(abs(stats-0.5)) < eps, "Failed test individual: generate random no bounds failed statistics"
@@ -37,13 +38,13 @@ def test_individual_generate_random_no_bound(tries=10, eps=0.1):
     # This is difficult to check, we look at the statistics of each bit
     for t in range(tries):
         size = random.randint(8, 32)
-        stats = np.zeros(shape=(size,),dtype=np.float)
+        stats = np.zeros(shape=(size,),dtype=float)
         runs = size * 100
         #stdev = np.sqrt(0.25/float(runs))
         #print('stdev:', stdev)
         for t in range(runs):
             temp = indiv.individual(size)
-            bstr = np.array(temp.bitstring.tolist(True))
+            bstr = np.array(temp.bitstring.tolist())
             stats += bstr
         stats = stats/float(runs)
         #print("max:", max(abs(stats-0.5)),'\n')
@@ -59,11 +60,11 @@ def test_individual_generate_random_with_bound(tries=10, eps=0.1):
         parts.sort()
         bounds = [(0, parts[1]-1)] + [(parts[i], parts[i+1]-1) for i in range(1,nrparts-1)] + [(parts[-1], size-1)]
 
-        stats = np.zeros(shape=(size,),dtype=np.float)
+        stats = np.zeros(shape=(size,),dtype=float)
         runs = size * 100
         for t in range(runs):
             temp = indiv.individual(size, boundary_list=bounds)
-            bstr = np.array(temp.bitstring.tolist(True))
+            bstr = np.array(temp.bitstring.tolist())
             stats += bstr
         stats = stats/float(runs)
         for lb, ub in bounds:
@@ -103,7 +104,7 @@ def test_cont_individual_size(tries=10):
 #TODO: Fix all the docstrings
 
 if __name__ == '__main__':
-    test_cont_individual_size()
     test_individual_generate_random_with_bound()
     test_individual_generate_random_no_bound()
+    test_cont_individual_size()
     test_individual_check_size()

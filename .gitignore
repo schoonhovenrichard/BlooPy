@@ -5,3 +5,4 @@ __pycache__/
 report.log
 dist/
 build/
+.hypothesis/
