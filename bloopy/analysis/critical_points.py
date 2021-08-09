@@ -1,7 +1,10 @@
 import itertools
 import warnings
+import numpy as np
 
 import bloopy.analysis.analysis_utils as anutil
+from bloopy.individual import individual
+import bloopy.utils as utils
 
 
 def classify_points(bsize, bound_list, nidxs_dict, method='bounded'):
@@ -142,7 +145,7 @@ def sizes_minima(sspace, bsize, bound_list, fitfunc, method="bounded"):
     total = 0
     hole_depths = []
     for x in itertools.product(*var_ranges):
-        anutil.set_bitstring(indiv, list(x))
+        utils.set_bitstring(indiv, list(x))
         xfit = fitfunc(indiv.bitstring)
 
         if method == "circular":
@@ -158,7 +161,7 @@ def sizes_minima(sspace, bsize, bound_list, fitfunc, method="bounded"):
             is_minimal = True
             nfits = []
             for nbour in nbours:
-                anutil.set_bitstring(indiv, nbour)
+                utils.set_bitstring(indiv, nbour)
                 nfit = fitfunc(indiv.bitstring)
                 nfits.append(nfit)
                 if nfit < xfit:# Neighbour has lower fitness
