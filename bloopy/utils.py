@@ -6,6 +6,27 @@ import os
 
 from bloopy.individual import individual
 
+def create_bitstring_from_int(val, length):
+    r"""
+    Create a bitarray initalized from an integer value.
+
+    Args:
+        val (int): integer to be encoded as bitstring.
+        length (int): specify length of bitstring.
+    """
+    if length < 0 or val < 0:
+        raise Exception("Invalid input for create bitstring")
+    if 2**length -1 < val:
+        raise Exception("Bitstring too short to encode value")
+    bitstring = bitarray(length)
+    bitstring.setall(False)
+    bs = bin(val)
+    for k in range(length):
+        if bs[-k-1] == 'b':
+            break
+        bitstring[k] = bool(int(bs[-k-1]))
+    return bitstring
+
 class discrete_space:
     r""" Class that stores the optimization space.
     Contains dictionary of possible values for each variable,

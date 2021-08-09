@@ -4,32 +4,12 @@ import copy
 from operator import itemgetter
 import multiprocessing as mp
 from bitarray import bitarray
+import bloopy.utils as utils
 
 r"""
 Fitness functions must take a bitstring (bitarray()) as input,
  and return the fitness (float)
 """
-
-def create_bitstring(val, length):
-    r"""
-    Helper functions for MK functions
-
-    Args:
-        val (int): integer to be encoded as bitstring.
-        length (int): specify length of bitstring.
-    """
-    if length < 0 or val < 0:
-        raise Exception("Invalid input for create bitstring")
-    if 2**length -1 < val:
-        raise Exception("Bitstring too short to encode value")
-    bitstring = bitarray(length)
-    bitstring.setall(False)
-    bs = bin(val)
-    for k in range(length):
-        if bs[-k-1] == 'b':
-            break
-        bitstring[k] = bool(int(bs[-k-1]))
-    return bitstring
 
 class MK_function:
     def __init__(self, m, k, bit_mask=None, fitness_map=None):
@@ -97,7 +77,7 @@ class adjacent_MK_function(MK_function):
         v = list(range(1,size+1))
         random.shuffle(v)
         for i in range(size):
-            bitset = create_bitstring(i, self.k)
+            bitset = utils.create_bitstring_from_int(i, self.k)
             mk_func[tuple(bitset)] = v[i]
         return mk_func
 
