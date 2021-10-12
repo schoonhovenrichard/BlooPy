@@ -10,7 +10,7 @@ from bloopy.individual import individual
 import bloopy.algorithms.hillclimbers as hillclimb
 
 class multi_start_local_search_base:
-    def __init__(self, fitness_function, bitstring_size, minmax_problem, searchspace=None, neighbour='Hamming', restriced_space=None):
+    def __init__(self, fitness_function, bitstring_size, minmax_problem, searchspace=None, neighbour='Hamming', restricted_space=None):
         r"""
         Base MultiStart Local Search algorithm. Different child classes
             can be constructed which override hillcimb_candidate and 
@@ -42,7 +42,11 @@ class multi_start_local_search_base:
             raise Exception("Unknown implementation for neighbouring solutions")
         else:
             self.nbour_method = neighbour
-        self.allowed_vars = restricted_space
+        if restricted_space is not None:
+            bitstring_space = utils.convert_paramspace_to_bitstringspace(restricted_space, searchspace)
+            self.allowed_vars = bitstring_space
+        else:
+            self.allowed_vars = None
 
     def generate_candidate(self, maxfeval):
         r"""
@@ -68,6 +72,7 @@ class multi_start_local_search_base:
             self.current_candidate.fitness = self.ffunc(self.current_candidate.bitstring)
             self.func_evals += 1
             self.visited_cache[bsstr] = self.current_candidate.fitness
+        
         self.hillclimb_candidate(maxfeval)
         if self.best_candidate is None or self.best_candidate.fitness*self.minmax < self.current_candidate.fitness*self.minmax:
             self.best_candidate = self.current_candidate
@@ -86,13 +91,15 @@ class multi_start_local_search_base:
                     raise Exception("Unable to find suitable candidate")
                 pos = random.randint(0, len(indiv.bitstring)-1)
                 indiv.bitstring[pos] = not indiv.bitstring[pos]
-                indiv.fitness = None
                 count += 1
                 if self.allowed_vars is None:
                     valid = True
                 else:
                     if indiv.bitstring.to01() in self.allowed_vars:
                         valid = True
+                    else:
+                        indiv.bitstring[pos] = not indiv.bitstring[pos]
+            indiv.fitness = None
         else:
             valid = False
             count = 0
@@ -104,14 +111,15 @@ class multi_start_local_search_base:
                 indiv.bitstring[indices[substr]] = 0
                 pos = random.randint(self.boundary_list[substr][0], self.boundary_list[substr][1])
                 indiv.bitstring[pos] = 1
-                indiv.fitness = None
                 count += 1
                 if self.allowed_vars is None:
                     valid = True
                 else:
                     if indiv.bitstring.to01() in self.allowed_vars:
                         valid = True
-
+                    else:
+                        indiv.bitstring[pos] = not indiv.bitstring[pos]
+            indiv.fitness = None
 
     def solve(self, iters, max_time, stopping_fitness, max_funcevals=None, verbose=True):
         r"""
@@ -194,7 +202,7 @@ class OrderedGreedyMLS(multi_start_local_search_base):
         self.func_evals += extra_fevals
 
 class RandomGreedyMLS(multi_start_local_search_base):
-    def __init__(self, fitness_function, bitstring_size, minmax_problem, searchspace=None, neighbour='Hamming', restart_search=True, restricted_space=restricted_space):
+    def __init__(self, fitness_function, bitstring_size, minmax_problem, searchspace=None, neighbour='Hamming', restart_search=True, restricted_space=None):
         r"""
             First improvement MLS which goes through neighbours at random.
 

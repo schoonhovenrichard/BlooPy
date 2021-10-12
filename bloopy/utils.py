@@ -106,7 +106,7 @@ class bitstring_as_discrete:
 def create_bitstring_searchspace(bs_size):
     searchspace = dict()
     for i in range(bs_size):
-            searchspace[str(i)] = [0,1]
+        searchspace[str(i)] = [0,1]
     return searchspace
 
 def generate_boundary_list(sspace):
@@ -120,6 +120,49 @@ def generate_boundary_list(sspace):
         boundary_list.append((stidx, stidx + len(vls) - 1))
         stidx += len(vls)
     return boundary_list
+
+def create_cleaned_parameter_space(cached_sols, reduced_sspace, orig_sspace):
+    nr_orig_params = len(orig_sspace.keys())
+    nr_tunable_params = len(reduced_sspace.keys())
+    cached_solutions = []
+
+    indices_to_tune = []
+    it = 0
+    for key in list(orig_sspace.keys()):
+        if key in list(reduced_sspace.keys()):
+            indices_to_tune.append(it)
+        it += 1
+
+    for key in cached_sols.keys():
+        settings = [int(x) for x in key.split(",")]
+        if len(settings) == nr_tunable_params:
+            cached_solutions.append(settings)
+        elif len(settings) == nr_orig_params:
+            vect = []
+            for j in indices_to_tune:
+                vect.append(settings[j])
+            cached_solutions.append(vect)
+        else:
+            raise Exception("Something wrong with cached keys and searchspace")
+    return cached_solutions
+
+def convert_paramspace_to_bitstringspace(paramspace, sspace):
+    boundary_list = generate_boundary_list(sspace)
+    vals = list(sspace.values())
+
+    bs_size = 0
+    for vls in vals:
+        bs_size += len(vls)
+
+    restricted_space = []
+    for var in paramspace:
+        bs = bitarray(bs_size*"0")
+        for i in range(len(var)):
+            for j in range(len(vals[i])):
+                if var[i] == vals[i][j]:
+                    bs[boundary_list[i][0]+j] = 1
+        restricted_space.append(bs.to01())
+    return restricted_space
 
 def clean_up_searchspace(sspace):
     r"""
