@@ -6,7 +6,7 @@ import copy
 
 from bloopy.individual import individual
 
-def RandomGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, nbour_method, restart=True):
+def RandomGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, nbour_method, restart=True, allowed_vars=None):
     if nbour_method not in ["Hamming", "adjacent"]:
         raise Exception("Unknown neighbour method.")
     splits = candidate.boundary_list
