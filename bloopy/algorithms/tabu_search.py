@@ -11,7 +11,7 @@ from bloopy.algorithms.local_search import multi_start_local_search_base
 
 
 class BestTabu(multi_start_local_search_base):
-    def __init__(self, fitness_function, bitstring_size, min_max_problem, tabu_size, searchspace=None, neighbour="Hamming"):
+    def __init__(self, fitness_function, bitstring_size, min_max_problem, tabu_size, searchspace=None, neighbour="Hamming", restricted_space=None):
         r"""
         Base Tabu Search algorithm.
 
@@ -26,7 +26,7 @@ class BestTabu(multi_start_local_search_base):
             searchspace (dict): Mapping of settings to fitnesses
             neighbour (string): Method for generating neighbour solutions to visit.
         """
-        super().__init__(fitness_function, bitstring_size, min_max_problem, searchspace=searchspace, neighbour=neighbour)
+        super().__init__(fitness_function, bitstring_size, min_max_problem, searchspace=searchspace, neighbour=neighbour, restricted_space=restricted_space)
         self.tabu_size = tabu_size
         self.tabu_list = deque(maxlen=tabu_size)
 
@@ -37,7 +37,18 @@ class BestTabu(multi_start_local_search_base):
         """
         # If we have no candidate yet
         if self.current_candidate is None:
-            self.current_candidate = individual(self.bs_size, boundary_list=self.boundary_list)
+            valid = False
+            count = 0
+            while not valid:
+                if count > 100:
+                    raise Exception("Unable to find suitable candidate")
+                self.current_candidate = individual(self.bs_size, boundary_list=self.boundary_list)
+                count += 1
+                if self.allowed_vars is None:
+                    valid = True
+                else:
+                    if self.current_candidate.bitstring.to01() in self.allowed_vars:
+                        valid = True
             bsstr = self.current_candidate.bitstring.to01()
             if bsstr in self.visited_cache:
                 self.current_candidate.fitness = self.visited_cache[bsstr]
@@ -57,6 +68,13 @@ class BestTabu(multi_start_local_search_base):
                 if maxfeval is not None and self.func_evals >= maxfeval:
                     break
                 neighbor.bitstring[k] = not neighbor.bitstring[k]
+                
+                if self.allowed_vars is not None:
+                    if neighbor.bitstring.to01() not in self.allowed_vars:
+                        # Skip this neighbour
+                        neighbor.bitstring[k] = not neighbor.bitstring[k]
+                        continue
+
                 if neighbor.bitstring in self.tabu_list:
                     # Skip this neighbour
                     neighbor.bitstring[k] = not neighbor.bitstring[k]
@@ -97,6 +115,14 @@ class BestTabu(multi_start_local_search_base):
                         break
                     neighbor.bitstring[indices[k]] = 0 # Set old one to 0
                     neighbor.bitstring[i] = 1 # set new one to 1
+
+                    if self.allowed_vars is not None:
+                        if neighbor.bitstring.to01() not in self.allowed_vars:
+                            # Skip this neighbour
+                            neighbor.bitstring[i] = 0 # set new one to 0
+                            neighbor.bitstring[indices[k]] = 1 # Set old one back to 1
+                            continue
+
                     if neighbor.bitstring in self.tabu_list:
                         # Skip this neighbour
                         neighbor.bitstring[i] = 0 # set new one to 0
@@ -139,7 +165,7 @@ class BestTabu(multi_start_local_search_base):
             self.best_candidate = copy.deepcopy(self.current_candidate)
 
 class RandomGreedyTabu(multi_start_local_search_base):
-    def __init__(self, fitness_function, bitstring_size, min_max_problem, tabu_size, searchspace=None, neighbour="Hamming"):
+    def __init__(self, fitness_function, bitstring_size, min_max_problem, tabu_size, searchspace=None, neighbour="Hamming", restricted_space=None):
         r"""
         Base Tabu Search algorithm.
 
@@ -154,7 +180,7 @@ class RandomGreedyTabu(multi_start_local_search_base):
             searchspace (dict): Mapping of settings to fitnesses
             neighbour (string): Method for generating neighbour solutions to visit.
         """
-        super().__init__(fitness_function, bitstring_size, min_max_problem, searchspace=searchspace, neighbour=neighbour)
+        super().__init__(fitness_function, bitstring_size, min_max_problem, searchspace=searchspace, neighbour=neighbour, restricted_space=restricted_space)
         self.tabu_size = tabu_size
         self.tabu_list = deque(maxlen=tabu_size)
 
@@ -165,7 +191,18 @@ class RandomGreedyTabu(multi_start_local_search_base):
         """
         # If we have no candidate yet
         if self.current_candidate is None:
-            self.current_candidate = individual(self.bs_size, boundary_list=self.boundary_list)
+            valid = False
+            count = 0
+            while not valid:
+                if count > 100:
+                    raise Exception("Unable to find suitable candidate")
+                self.current_candidate = individual(self.bs_size, boundary_list=self.boundary_list)
+                count += 1
+                if self.allowed_vars is None:
+                    valid = True
+                else:
+                    if self.current_candidate.bitstring.to01() in self.allowed_vars:
+                        valid = True
             bsstr = self.current_candidate.bitstring.to01()
             if bsstr in self.visited_cache:
                 self.current_candidate.fitness = self.visited_cache[bsstr]
@@ -187,6 +224,13 @@ class RandomGreedyTabu(multi_start_local_search_base):
                     break
                 idx = shuffle[k]
                 neighbor.bitstring[idx] = not neighbor.bitstring[idx]
+
+                if self.allowed_vars is not None:
+                    if neighbor.bitstring.to01() not in self.allowed_vars:
+                        # Skip this neighbour
+                        neighbor.bitstring[idx] = not neighbor.bitstring[idx]
+                        continue
+
                 if neighbor.bitstring in self.tabu_list:
                     # Skip this neighbour
                     neighbor.bitstring[idx] = not neighbor.bitstring[idx]
@@ -238,6 +282,14 @@ class RandomGreedyTabu(multi_start_local_search_base):
                         break
                     neighbor.bitstring[indices[k]] = 0 # Set old one to 0
                     neighbor.bitstring[i] = 1 # set new one to 1
+
+                    if self.allowed_vars is not None:
+                        if neighbor.bitstring.to01() not in self.allowed_vars:
+                            # Skip this neighbour
+                            neighbor.bitstring[i] = 0 # set new one to 0
+                            neighbor.bitstring[indices[k]] = 1 # Set old one back to 1
+                            continue
+
                     if neighbor.bitstring in self.tabu_list:
                         # Skip this neighbour
                         neighbor.bitstring[i] = 0 # set new one to 0

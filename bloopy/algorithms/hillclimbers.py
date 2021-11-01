@@ -6,7 +6,7 @@ import copy
 
 from bloopy.individual import individual
 
-def RandomGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, nbour_method, restart=True):
+def RandomGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, nbour_method, restart=True, allowed_vars=None):
     if nbour_method not in ["Hamming", "adjacent"]:
         raise Exception("Unknown neighbour method.")
     splits = candidate.boundary_list
@@ -27,6 +27,13 @@ def RandomGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited
                 idx = shuffle[k]
                 child.bitstring[idx] = not child.bitstring[idx]
                 bsstr = child.bitstring.to01()
+
+                if allowed_vars is not None:
+                    if bsstr not in allowed_vars:
+                        child.bitstring[idx] = not child.bitstring[idx] # flip back
+                        child.fitness = candidate.fitness
+                        continue
+
                 if bsstr in visited_cache:
                     child.fitness = visited_cache[bsstr]
                 else:
@@ -63,6 +70,14 @@ def RandomGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited
                     child.bitstring[indices[k]] = 0 # Set old one to 0
                     child.bitstring[i] = 1 # set new one to 1
                     bsstr = child.bitstring.to01()
+
+                    if allowed_vars is not None:
+                        if bsstr not in allowed_vars:
+                            child.bitstring[i] = 0 # set new one to 0
+                            child.bitstring[indices[k]] = 1 # Set old one back to 1
+                            child.fitness = candidate.fitness
+                            continue
+
                     if bsstr in visited_cache:
                         child.fitness = visited_cache[bsstr]
                     else:
@@ -83,7 +98,7 @@ def RandomGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited
                     break
     return candidate, func_evals, visited_cache
 
-def OrderedGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, nbour_method, order, restart=True):
+def OrderedGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, nbour_method, order, restart=True, allowed_vars=None):
     if nbour_method not in ["Hamming", "adjacent"]:
         raise Exception("Unknown neighbour method.")
     splits = candidate.boundary_list
@@ -105,6 +120,13 @@ def OrderedGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visite
                     break
                 child.bitstring[k] = not child.bitstring[k]
                 bsstr = child.bitstring.to01()
+
+                if allowed_vars is not None:
+                    if bsstr not in allowed_vars:
+                        child.bitstring[idx] = not child.bitstring[idx] # flip back
+                        child.fitness = candidate.fitness
+                        continue
+
                 if bsstr in visited_cache:
                     child.fitness = visited_cache[bsstr]
                 else:
@@ -143,6 +165,14 @@ def OrderedGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visite
                     child.bitstring[indices[k]] = 0 # Set old one to 0
                     child.bitstring[i] = 1 # set new one to 1
                     bsstr = child.bitstring.to01()
+
+                    if allowed_vars is not None:
+                        if bsstr not in allowed_vars:
+                            child.bitstring[i] = 0 # set new one to 0
+                            child.bitstring[indices[k]] = 1 # Set old one back to 1
+                            child.fitness = candidate.fitness
+                            continue
+
                     if bsstr in visited_cache:
                         child.fitness = visited_cache[bsstr]
                     else:
@@ -163,7 +193,7 @@ def OrderedGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visite
                     break
     return candidate, func_evals, visited_cache
 
-def BestHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, nbour_method):
+def BestHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, nbour_method, allowed_vars=None):
     if nbour_method not in ["Hamming", "adjacent"]:
         raise Exception("Unknown neighbour method.")
     splits = candidate.boundary_list
@@ -183,6 +213,13 @@ def BestHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, 
                     break
                 child.bitstring[k] = not child.bitstring[k]
                 bsstr = child.bitstring.to01()
+
+                if allowed_vars is not None:
+                    if bsstr not in allowed_vars:
+                        child.bitstring[idx] = not child.bitstring[idx] # flip back
+                        child.fitness = candidate.fitness
+                        continue
+
                 if bsstr in visited_cache:
                     child.fitness = visited_cache[bsstr]
                 else:
@@ -222,6 +259,14 @@ def BestHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, 
                     child.bitstring[indices[k]] = 0 # Set old one to 0
                     child.bitstring[i] = 1 # set new one to 1
                     bsstr = child.bitstring.to01()
+
+                    if allowed_vars is not None:
+                        if bsstr not in allowed_vars:
+                            child.bitstring[i] = 0 # set new one to 0
+                            child.bitstring[indices[k]] = 1 # Set old one back to 1
+                            child.fitness = candidate.fitness
+                            continue
+
                     if bsstr in visited_cache:
                         child.fitness = visited_cache[bsstr]
                     else:
@@ -243,7 +288,7 @@ def BestHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, 
                 candidate = copy.deepcopy(best_child)
     return candidate, func_evals, visited_cache
 
-def StochasticHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, nbour_method):
+def StochasticHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, nbour_method, allowed_vars=None):
     if nbour_method not in ["Hamming", "adjacent"]:
         raise Exception("Unknown neighbour method.")
     splits = candidate.boundary_list
@@ -264,6 +309,13 @@ def StochasticHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_c
                     break
                 child.bitstring[k] = not child.bitstring[k]
                 bsstr = child.bitstring.to01()
+
+                if allowed_vars is not None:
+                    if bsstr not in allowed_vars:
+                        child.bitstring[idx] = not child.bitstring[idx] # flip back
+                        child.fitness = candidate.fitness
+                        continue
+
                 if bsstr in visited_cache:
                     child.fitness = visited_cache[bsstr]
                 else:
@@ -297,6 +349,14 @@ def StochasticHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_c
                     child.bitstring[indices[k]] = 0 # Set old one to 0
                     child.bitstring[i] = 1 # set new one to 1
                     bsstr = child.bitstring.to01()
+
+                    if allowed_vars is not None:
+                        if bsstr not in allowed_vars:
+                            child.bitstring[i] = 0 # set new one to 0
+                            child.bitstring[indices[k]] = 1 # Set old one back to 1
+                            child.fitness = candidate.fitness
+                            continue
+
                     if bsstr in visited_cache:
                         child.fitness = visited_cache[bsstr]
                     else:
