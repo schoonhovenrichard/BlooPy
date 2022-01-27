@@ -32,8 +32,8 @@ class ltga(genetic_algorithm):
             bitstring_size (int): Length of the bitstring instances.
             min_max_problem (int): 1 if maximization problem, -1 for
                     minimization problem. Default is 1.
-            boundary_list (list(tuple(int))): (optional) None if 
-                regular bitstrings. Otherwise, list of tuples 
+            boundary_list (list(tuple(int))): (optional) None if
+                regular bitstrings. Otherwise, list of tuples
                 (start, end) of each segment of the bitstring in
                 which we can have only one 1 that points to the
                 element of the list that is active.
@@ -179,7 +179,7 @@ class ltga(genetic_algorithm):
                 child1, child2 = self.reproductor(par1, par2, crossover_mask)
                 if child1.bitstring == par1.bitstring and child2.bitstring == par2.bitstring:
                     continue
-                
+
                 if self.LOGTOLIN:
                     self.set_fitness_log(child1)
                     self.set_fitness_log(child2)
@@ -297,6 +297,8 @@ class ltga(genetic_algorithm):
             last_cluster = cluster
             cluster_tracker.append(cluster)
         while len(last_cluster) < self.maxdepth:
+            if len(last_cluster) >= self.bs_size:
+                break
             best_info = sys.float_info.max
             best_indices = []
             for i in range(len(cluster_tracker)):
