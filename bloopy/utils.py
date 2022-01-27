@@ -55,7 +55,7 @@ class discrete_space:
         else:
             raise Exception("fitness_func not of type function or dictionary")
 
-    def fitness(self, bitstring):
+    def get_bitstring_as_paramvec(self, bitstring):
         ## Convert bitstring to vector of variable values
         vector = []
         start_ind = 0
@@ -68,6 +68,10 @@ class discrete_space:
                 raise Exception("Asked to compute fitness of invalid bitstring!")
             vector.append(vals[indices[0]])
             start_ind = end_ind
+        return vector
+
+    def fitness(self, bitstring):
+        vector = self.get_bitstring_as_paramvec(bitstring)
         return self.fitness_func(vector)
 
     def isvalid(self, bitstring):
