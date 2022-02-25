@@ -101,7 +101,7 @@ class genetic_algorithm:
                     pop[i].fitness = self.ffunc(pop[i].bitstring)
                     self.visited_cache[bsstr] = pop[i].fitness
                     self.func_evals += 1
-            else
+            else:
                 pop[i].fitness = self.ffunc(pop[i].bitstring)
                 self.func_evals += 1
 
