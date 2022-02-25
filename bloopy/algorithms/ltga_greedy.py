@@ -18,7 +18,8 @@ class ltga_greedy(ltga):
             min_max_problem=1, #1 for maximization problems, -1 for minimization
             searchspace=None,
             input_pop=None,
-            maxdepth=None):
+            maxdepth=None,
+            caching=True):
         r"""
         Base Linkage Tree Genetic Algorithm with greedy selection.
 
@@ -29,8 +30,8 @@ class ltga_greedy(ltga):
             bitstring_size (int): Length of the bitstring instances.
             min_max_problem (int): 1 if maximization problem, -1 for
                     minimization problem. Default is 1.
-            boundary_list (list(tuple(int))): (optional) None if 
-                regular bitstrings. Otherwise, list of tuples 
+            boundary_list (list(tuple(int))): (optional) None if
+                regular bitstrings. Otherwise, list of tuples
                 (start, end) of each segment of the bitstring in
                 which we can have only one 1 that points to the
                 element of the list that is active.
@@ -39,6 +40,9 @@ class ltga_greedy(ltga):
                 the GA will generate its own.
             maxdepth (int): Maximum tree depth for search masks
                 for mutual information.
+            caching (bool): If true, caches fitness for every point in search space
+                    visited (repeated visits do not count towards function evaluation.
+                    Should not be used for stochastic optimization.
         """
         super().__init__(fitness_function,
                 population_size,
@@ -46,12 +50,13 @@ class ltga_greedy(ltga):
                 min_max_problem,
                 searchspace,
                 input_pop,
-                maxdepth)
+                maxdepth,
+                caching=caching)
         self.reproductor = rep.greedy_mask_crossover_pair
 
     def create_offspring(self, parents):
         r"""
-        Create offspring for LTGA greedily by selecting random donor 
+        Create offspring for LTGA greedily by selecting random donor
         for mask crossover. Read paper for further details
         """
         self.build_linkage_tree()

@@ -11,7 +11,7 @@ from bloopy.algorithms.local_search import multi_start_local_search_base
 
 
 class BestTabu(multi_start_local_search_base):
-    def __init__(self, fitness_function, bitstring_size, min_max_problem, tabu_size, searchspace=None, neighbour="Hamming", restricted_space=None):
+    def __init__(self, fitness_function, bitstring_size, min_max_problem, tabu_size, searchspace=None, neighbour="Hamming", caching=True, restricted_space=None):
         r"""
         Base Tabu Search algorithm.
 
@@ -25,8 +25,12 @@ class BestTabu(multi_start_local_search_base):
             tabu_size (int): Size of queue that maintains tabu solutions.
             searchspace (dict): Mapping of settings to fitnesses
             neighbour (string): Method for generating neighbour solutions to visit.
+            caching (bool): If true, caches fitness for every point in search space
+                    visited (repeated visits do not count towards function evaluation.
+                    Should not be used for stochastic optimization.
+            restricted_space (list): List of allowed solutions in the space to be tested.
         """
-        super().__init__(fitness_function, bitstring_size, min_max_problem, searchspace=searchspace, neighbour=neighbour, restricted_space=restricted_space)
+        super().__init__(fitness_function, bitstring_size, min_max_problem, searchspace=searchspace, neighbour=neighbour, caching=caching, restricted_space=restricted_space)
         self.tabu_size = tabu_size
         self.tabu_list = deque(maxlen=tabu_size)
 
@@ -49,13 +53,18 @@ class BestTabu(multi_start_local_search_base):
                 else:
                     if self.current_candidate.bitstring.to01() in self.allowed_vars:
                         valid = True
-            bsstr = self.current_candidate.bitstring.to01()
-            if bsstr in self.visited_cache:
-                self.current_candidate.fitness = self.visited_cache[bsstr]
+            if self.caching:
+                bsstr = self.current_candidate.bitstring.to01()
+                if bsstr in self.visited_cache:
+                    self.current_candidate.fitness = self.visited_cache[bsstr]
+                else:
+                    self.current_candidate.fitness = self.ffunc(self.current_candidate.bitstring)
+                    self.visited_cache[bsstr] = self.current_candidate.fitness
+                    self.func_evals += 1
             else:
                 self.current_candidate.fitness = self.ffunc(self.current_candidate.bitstring)
-                self.visited_cache[bsstr] = self.current_candidate.fitness
                 self.func_evals += 1
+
             if self.best_candidate is None or self.best_candidate.fitness*self.minmax < self.current_candidate.fitness*self.minmax:
                 self.best_candidate = copy.deepcopy(self.current_candidate)
 
@@ -68,7 +77,7 @@ class BestTabu(multi_start_local_search_base):
                 if maxfeval is not None and self.func_evals >= maxfeval:
                     break
                 neighbor.bitstring[k] = not neighbor.bitstring[k]
-                
+
                 if self.allowed_vars is not None:
                     if neighbor.bitstring.to01() not in self.allowed_vars:
                         # Skip this neighbour
@@ -81,12 +90,16 @@ class BestTabu(multi_start_local_search_base):
                     continue
 
                 #Non tabu neighbour, get fitness
-                bsstr = neighbor.bitstring.to01()
-                if bsstr in self.visited_cache:
-                    neighbor.fitness = self.visited_cache[bsstr]
+                if self.caching:
+                    bsstr = neighbor.bitstring.to01()
+                    if bsstr in self.visited_cache:
+                        neighbor.fitness = self.visited_cache[bsstr]
+                    else:
+                        neighbor.fitness = self.ffunc(neighbor.bitstring)
+                        self.visited_cache[bsstr] = neighbor.fitness
+                        self.func_evals += 1
                 else:
                     neighbor.fitness = self.ffunc(neighbor.bitstring)
-                    self.visited_cache[bsstr] = neighbor.fitness
                     self.func_evals += 1
 
                 if best_neighbor is None:
@@ -130,12 +143,16 @@ class BestTabu(multi_start_local_search_base):
                         continue
 
                     #Non tabu neighbour, get fitness
-                    bsstr = neighbor.bitstring.to01()
-                    if bsstr in self.visited_cache:
-                        neighbor.fitness = self.visited_cache[bsstr]
+                    if self.caching:
+                        bsstr = neighbor.bitstring.to01()
+                        if bsstr in self.visited_cache:
+                            neighbor.fitness = self.visited_cache[bsstr]
+                        else:
+                            neighbor.fitness = self.ffunc(neighbor.bitstring)
+                            self.visited_cache[bsstr] = neighbor.fitness
+                            self.func_evals += 1
                     else:
                         neighbor.fitness = self.ffunc(neighbor.bitstring)
-                        self.visited_cache[bsstr] = neighbor.fitness
                         self.func_evals += 1
 
                     if best_neighbor is None:
@@ -151,11 +168,15 @@ class BestTabu(multi_start_local_search_base):
             # If the entire neighbourhood is tabu, return random point
             best_neighbor = individual(self.bs_size, boundary_list=self.boundary_list)
             bsstr = best_neighbor.bitstring.to01()
-            if bsstr in self.visited_cache:
-                best_neighbor.fitness = self.visited_cache[bsstr]
+            if self.caching:
+                if bsstr in self.visited_cache:
+                    best_neighbor.fitness = self.visited_cache[bsstr]
+                else:
+                    best_neighbor.fitness = self.ffunc(best_neighbor.bitstring)
+                    self.visited_cache[bsstr] = best_neighbor.fitness
+                    self.func_evals += 1
             else:
                 best_neighbor.fitness = self.ffunc(best_neighbor.bitstring)
-                self.visited_cache[bsstr] = best_neighbor.fitness
                 self.func_evals += 1
 
         # We always set the best neighbour as current candidate, even if its worse
@@ -165,7 +186,7 @@ class BestTabu(multi_start_local_search_base):
             self.best_candidate = copy.deepcopy(self.current_candidate)
 
 class RandomGreedyTabu(multi_start_local_search_base):
-    def __init__(self, fitness_function, bitstring_size, min_max_problem, tabu_size, searchspace=None, neighbour="Hamming", restricted_space=None):
+    def __init__(self, fitness_function, bitstring_size, min_max_problem, tabu_size, searchspace=None, neighbour="Hamming", caching=True, restricted_space=None):
         r"""
         Base Tabu Search algorithm.
 
@@ -179,8 +200,12 @@ class RandomGreedyTabu(multi_start_local_search_base):
             tabu_size (int): Size of queue that maintains tabu solutions.
             searchspace (dict): Mapping of settings to fitnesses
             neighbour (string): Method for generating neighbour solutions to visit.
+            caching (bool): If true, caches fitness for every point in search space
+                    visited (repeated visits do not count towards function evaluation.
+                    Should not be used for stochastic optimization.
+            restricted_space (list): List of allowed solutions in the space to be tested.
         """
-        super().__init__(fitness_function, bitstring_size, min_max_problem, searchspace=searchspace, neighbour=neighbour, restricted_space=restricted_space)
+        super().__init__(fitness_function, bitstring_size, min_max_problem, searchspace=searchspace, neighbour=neighbour, caching=caching, restricted_space=restricted_space)
         self.tabu_size = tabu_size
         self.tabu_list = deque(maxlen=tabu_size)
 
@@ -203,12 +228,16 @@ class RandomGreedyTabu(multi_start_local_search_base):
                 else:
                     if self.current_candidate.bitstring.to01() in self.allowed_vars:
                         valid = True
-            bsstr = self.current_candidate.bitstring.to01()
-            if bsstr in self.visited_cache:
-                self.current_candidate.fitness = self.visited_cache[bsstr]
+            if self.caching:
+                bsstr = self.current_candidate.bitstring.to01()
+                if bsstr in self.visited_cache:
+                    self.current_candidate.fitness = self.visited_cache[bsstr]
+                else:
+                    self.current_candidate.fitness = self.ffunc(self.current_candidate.bitstring)
+                    self.visited_cache[bsstr] = self.current_candidate.fitness
+                    self.func_evals += 1
             else:
                 self.current_candidate.fitness = self.ffunc(self.current_candidate.bitstring)
-                self.visited_cache[bsstr] = self.current_candidate.fitness
                 self.func_evals += 1
             if self.best_candidate is None or self.best_candidate.fitness*self.minmax < self.current_candidate.fitness*self.minmax:
                 self.best_candidate = copy.deepcopy(self.current_candidate)
@@ -237,12 +266,16 @@ class RandomGreedyTabu(multi_start_local_search_base):
                     continue
 
                 #Non tabu neighbour, get fitness
-                bsstr = neighbor.bitstring.to01()
-                if bsstr in self.visited_cache:
-                    neighbor.fitness = self.visited_cache[bsstr]
+                if self.caching:
+                    bsstr = neighbor.bitstring.to01()
+                    if bsstr in self.visited_cache:
+                        neighbor.fitness = self.visited_cache[bsstr]
+                    else:
+                        neighbor.fitness = self.ffunc(neighbor.bitstring)
+                        self.visited_cache[bsstr] = neighbor.fitness
+                        self.func_evals += 1
                 else:
                     neighbor.fitness = self.ffunc(neighbor.bitstring)
-                    self.visited_cache[bsstr] = neighbor.fitness
                     self.func_evals += 1
 
                 # If we improved, immediately return
@@ -297,12 +330,16 @@ class RandomGreedyTabu(multi_start_local_search_base):
                         continue
 
                     #Non tabu neighbour, get fitness
-                    bsstr = neighbor.bitstring.to01()
-                    if bsstr in self.visited_cache:
-                        neighbor.fitness = self.visited_cache[bsstr]
+                    if self.caching:
+                        bsstr = neighbor.bitstring.to01()
+                        if bsstr in self.visited_cache:
+                            neighbor.fitness = self.visited_cache[bsstr]
+                        else:
+                            neighbor.fitness = self.ffunc(neighbor.bitstring)
+                            self.visited_cache[bsstr] = neighbor.fitness
+                            self.func_evals += 1
                     else:
                         neighbor.fitness = self.ffunc(neighbor.bitstring)
-                        self.visited_cache[bsstr] = neighbor.fitness
                         self.func_evals += 1
 
                     # If we improved, immediately return
@@ -326,12 +363,16 @@ class RandomGreedyTabu(multi_start_local_search_base):
         if best_neighbor is None:
             # If the entire neighbourhood is tabu, return random point
             best_neighbor = individual(self.bs_size, boundary_list=self.boundary_list)
-            bsstr = best_neighbor.bitstring.to01()
-            if bsstr in self.visited_cache:
-                best_neighbor.fitness = self.visited_cache[bsstr]
+            if self.caching:
+                bsstr = best_neighbor.bitstring.to01()
+                if bsstr in self.visited_cache:
+                    best_neighbor.fitness = self.visited_cache[bsstr]
+                else:
+                    best_neighbor.fitness = self.ffunc(best_neighbor.bitstring)
+                    self.visited_cache[bsstr] = best_neighbor.fitness
+                    self.func_evals += 1
             else:
                 best_neighbor.fitness = self.ffunc(best_neighbor.bitstring)
-                self.visited_cache[bsstr] = best_neighbor.fitness
                 self.func_evals += 1
 
         # We always set the best neighbour as current candidate, even if its worse

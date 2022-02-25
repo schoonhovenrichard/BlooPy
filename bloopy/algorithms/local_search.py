@@ -10,10 +10,10 @@ from bloopy.individual import individual
 import bloopy.algorithms.hillclimbers as hillclimb
 
 class multi_start_local_search_base:
-    def __init__(self, fitness_function, bitstring_size, minmax_problem, searchspace=None, neighbour='Hamming', restricted_space=None):
+    def __init__(self, fitness_function, bitstring_size, minmax_problem, searchspace=None, neighbour='Hamming', caching=True, restricted_space=None):
         r"""
         Base MultiStart Local Search algorithm. Different child classes
-            can be constructed which override hillcimb_candidate and 
+            can be constructed which override hillcimb_candidate and
             point_mutate.
 
         Args:
@@ -25,6 +25,9 @@ class multi_start_local_search_base:
                     minimization problem. Default is 1.
             searchspace (dict): Mapping of settings to fitnesses
             neighbour (string): Method for generating neighbour solutions to visit.
+            caching (bool): If true, caches fitness for every point in search space
+                    visited (repeated visits do not count towards function evaluation.
+                    Should not be used for stochastic optimization.
             restricted_space (list): List of allowed solutions in the space to be tested.
         """
         self.ffunc = fitness_function
@@ -37,7 +40,12 @@ class multi_start_local_search_base:
         self.best_candidate = None
         self.current_candidate = None
         self.func_evals = 0
-        self.visited_cache = dict()
+        self.caching = caching
+        if self.caching:
+            self.visited_cache = dict()
+        else:
+            self.visited_cache = None
+
         if neighbour not in ['Hamming', 'adjacent']:
             raise Exception("Unknown implementation for neighbouring solutions")
         else:
@@ -66,13 +74,17 @@ class multi_start_local_search_base:
                     valid = True
 
         bsstr = self.current_candidate.bitstring.to01()
-        if bsstr in self.visited_cache:
-            self.current_candidate.fitness = self.visited_cache[bsstr]
+        if self.caching:
+            if bsstr in self.visited_cache:
+                self.current_candidate.fitness = self.visited_cache[bsstr]
+            else:
+                self.current_candidate.fitness = self.ffunc(self.current_candidate.bitstring)
+                self.func_evals += 1
+                self.visited_cache[bsstr] = self.current_candidate.fitness
         else:
-            self.current_candidate.fitness = self.ffunc(self.current_candidate.bitstring)
-            self.func_evals += 1
-            self.visited_cache[bsstr] = self.current_candidate.fitness
-        
+                self.current_candidate.fitness = self.ffunc(self.current_candidate.bitstring)
+                self.func_evals += 1
+
         self.hillclimb_candidate(maxfeval)
         if self.best_candidate is None or self.best_candidate.fitness*self.minmax < self.current_candidate.fitness*self.minmax:
             self.best_candidate = self.current_candidate
@@ -176,7 +188,7 @@ class multi_start_local_search_base:
         return (best_fit, self.best_candidate, self.func_evals)
 
 class OrderedGreedyMLS(multi_start_local_search_base):
-    def __init__(self, fitness_function, bitstring_size, minmax_problem, searchspace=None, neighbour='Hamming', restart_search=True, order=None, restricted_space=None):
+    def __init__(self, fitness_function, bitstring_size, minmax_problem, searchspace=None, neighbour='Hamming', caching=True, restart_search=True, order=None, restricted_space=None):
         r"""
             First improvement MLS which goes through neighbours in order.
 
@@ -189,12 +201,15 @@ class OrderedGreedyMLS(multi_start_local_search_base):
                     minimization problem. Default is 1.
             searchspace (dict): Mapping of settings to fitnesses
             neighbour (string): Method for generating neighbour solutions to visit.
+            caching (bool): If true, caches fitness for every point in search space
+                    visited (repeated visits do not count towards function evaluation.
+                    Should not be used for stochastic optimization.
             restartsearch (bool): Bool to decide whether we keep searching in the loop,
                     or break out of the loop en hillclimb from the start
             order (list): Order in which the variables should be
                 traversed to find improvement neighbours.
         """
-        super().__init__(fitness_function, bitstring_size, minmax_problem, searchspace=searchspace, neighbour=neighbour, restricted_space=restricted_space)
+        super().__init__(fitness_function, bitstring_size, minmax_problem, searchspace=searchspace, neighbour=neighbour, caching=caching, restricted_space=restricted_space)
         self.restart = restart_search
         self.order = order
 
@@ -203,7 +218,7 @@ class OrderedGreedyMLS(multi_start_local_search_base):
         self.func_evals += extra_fevals
 
 class RandomGreedyMLS(multi_start_local_search_base):
-    def __init__(self, fitness_function, bitstring_size, minmax_problem, searchspace=None, neighbour='Hamming', restart_search=True, restricted_space=None):
+    def __init__(self, fitness_function, bitstring_size, minmax_problem, searchspace=None, neighbour='Hamming', caching=True, restart_search=True, restricted_space=None):
         r"""
             First improvement MLS which goes through neighbours at random.
 
@@ -216,18 +231,21 @@ class RandomGreedyMLS(multi_start_local_search_base):
                     minimization problem. Default is 1.
             searchspace (dict): Mapping of settings to fitnesses
             neighbour (string): Method for generating neighbour solutions to visit.
+            caching (bool): If true, caches fitness for every point in search space
+                    visited (repeated visits do not count towards function evaluation.
+                    Should not be used for stochastic optimization.
             restartsearch (bool): Bool to decide whether we keep searching in the loop,
                     or break out of the loop en hillclimb from the start
         """
-        super().__init__(fitness_function, bitstring_size, minmax_problem, searchspace=searchspace, neighbour=neighbour, restricted_space=restricted_space)
+        super().__init__(fitness_function, bitstring_size, minmax_problem, searchspace=searchspace, neighbour=neighbour, caching=caching, restricted_space=restricted_space)
         self.restart = restart_search
-    
+
     def hillclimb_candidate(self, maxfeval):
         self.current_candidate, extra_fevals, self.visited_cache = hillclimb.RandomGreedyHillclimb(self.current_candidate, self.ffunc, self.minmax, self.func_evals, maxfeval, self.visited_cache, self.nbour_method, restart=self.restart, allowed_vars=self.allowed_vars)
         self.func_evals += extra_fevals
 
 class BestMLS(multi_start_local_search_base):
-    def __init__(self, fitness_function, bitstring_size, minmax_problem, searchspace=None, neighbour='Hamming', restricted_space=None):
+    def __init__(self, fitness_function, bitstring_size, minmax_problem, searchspace=None, neighbour='Hamming', caching=True, restricted_space=None):
         r"""
             Best improvement MLS which goes through all neighbours and moves to the best.
 
@@ -240,18 +258,21 @@ class BestMLS(multi_start_local_search_base):
                     minimization problem. Default is 1.
             searchspace (dict): Mapping of settings to fitnesses
             neighbour (string): Method for generating neighbour solutions to visit.
+            caching (bool): If true, caches fitness for every point in search space
+                    visited (repeated visits do not count towards function evaluation.
+                    Should not be used for stochastic optimization.
         """
-        super().__init__(fitness_function, bitstring_size, minmax_problem, searchspace=searchspace, neighbour=neighbour, restricted_space=restricted_space)
+        super().__init__(fitness_function, bitstring_size, minmax_problem, searchspace=searchspace, neighbour=neighbour, caching=caching, restricted_space=restricted_space)
 
     def hillclimb_candidate(self, maxfeval):
         self.current_candidate, extra_fevals, self.visited_cache = hillclimb.BestHillclimb(self.current_candidate, self.ffunc, self.minmax, self.func_evals, maxfeval, self.visited_cache, self.nbour_method, allowed_vars=self.allowed_vars)
         self.func_evals += extra_fevals
 
 class StochasticMLS(multi_start_local_search_base):
-    def __init__(self, fitness_function, bitstring_size, minmax_problem, searchspace=None, neighbour='Hamming', restricted_space=None):
+    def __init__(self, fitness_function, bitstring_size, minmax_problem, searchspace=None, neighbour='Hamming', caching=True, restricted_space=None):
         r"""
             Stochastic improvement MLS which goes through all neighbours
-             and moves to possible improvement with a probability that 
+             and moves to possible improvement with a probability that
              depends on the size of the improvement.
 
         Args:
@@ -263,8 +284,11 @@ class StochasticMLS(multi_start_local_search_base):
                     minimization problem. Default is 1.
             searchspace (dict): Mapping of settings to fitnesses
             neighbour (string): Method for generating neighbour solutions to visit.
+            caching (bool): If true, caches fitness for every point in search space
+                    visited (repeated visits do not count towards function evaluation.
+                    Should not be used for stochastic optimization.
         """
-        super().__init__(fitness_function, bitstring_size, minmax_problem, searchspace=searchspace, neighbour=neighbour, restricted_space=restricted_space)
+        super().__init__(fitness_function, bitstring_size, minmax_problem, searchspace=searchspace, neighbour=neighbour, caching=caching, restricted_space=restricted_space)
 
     def hillclimb_candidate(self, maxfeval):
         self.current_candidate, extra_fevals, self.visited_cache = hillclimb.StochasticHillclimb(self.current_candidate, self.ffunc, self.minmax, self.func_evals, maxfeval, self.visited_cache, self.nbour_method, allowed_vars=self.allowed_vars)

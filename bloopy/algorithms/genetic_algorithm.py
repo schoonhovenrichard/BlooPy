@@ -23,7 +23,8 @@ class genetic_algorithm:
             min_max_problem=1, #1 for maximization problems, -1 for minimization
             searchspace=None,
             input_pop=None,
-            mutation=0.05):
+            mutation=0.05,
+            caching=True):
         r"""
         Base genetic algorithm. Most functionalities can be adapted
             by changing input component functions. Only mutation is
@@ -39,8 +40,8 @@ class genetic_algorithm:
             bitstring_size (int): Length of the bitstring instances.
             min_max_problem (int): 1 if maximization problem, -1 for
                     minimization problem. Default is 1.
-            boundary_list (list(tuple(int))): (optional) None if 
-                regular bitstrings. Otherwise, list of tuples 
+            boundary_list (list(tuple(int))): (optional) None if
+                regular bitstrings. Otherwise, list of tuples
                 (start, end) of each segment of the bitstring in
                 which we can have only one 1 that points to the
                 element of the list that is active.
@@ -51,6 +52,9 @@ class genetic_algorithm:
                 many mutations are applied to each individual each
                 generation. The parameter is multiplied times the
                 bitstring length to get the nr of point mutatations.
+            caching (bool): If true, caches fitness for every point in search space
+                    visited (repeated visits do not count towards function evaluation.
+                    Should not be used for stochastic optimization.
         """
         self.ffunc = fitness_function
         self.reproductor = reproductor
@@ -62,7 +66,13 @@ class genetic_algorithm:
             self.boundary_list = None
         else:
             self.boundary_list = utils.generate_boundary_list(searchspace)
-        self.visited_cache = dict()
+
+        self.caching = caching
+        if self.caching:
+            self.visited_cache = dict()
+        else:
+            self.visited_cache = None
+
         self.func_evals = 0
         if mutation is not None:
             self.mutation = max(1, int(self.bs_size * mutation))
@@ -75,7 +85,7 @@ class genetic_algorithm:
         else:
             self.current_pop = input_pop
         assert self.pop_size == len(self.current_pop)
-        
+
         self.set_fit_pop(self.current_pop)
 
     def set_fit_pop(self, pop):
@@ -83,12 +93,16 @@ class genetic_algorithm:
         Set fitness of the current population.
         """
         for i in range(len(pop)):
-            bsstr = pop[i].bitstring.to01()
-            if bsstr in self.visited_cache:
-                pop[i].fitness = self.visited_cache[bsstr]
-            else:
+            if self.caching:
+                bsstr = pop[i].bitstring.to01()
+                if bsstr in self.visited_cache:
+                    pop[i].fitness = self.visited_cache[bsstr]
+                else:
+                    pop[i].fitness = self.ffunc(pop[i].bitstring)
+                    self.visited_cache[bsstr] = pop[i].fitness
+                    self.func_evals += 1
+            else
                 pop[i].fitness = self.ffunc(pop[i].bitstring)
-                self.visited_cache[bsstr] = pop[i].fitness
                 self.func_evals += 1
 
     def generate_random_pop(self):
@@ -98,13 +112,17 @@ class genetic_algorithm:
         self.current_pop = []
         for i in range(self.pop_size):
             new_specimen = individual(self.bs_size, boundary_list=self.boundary_list)
-            bsstr = new_specimen.bitstring.to01()
-            if bsstr in self.visited_cache:
-                new_specimen.fitness = self.visited_cache[bsstr]
+            if self.caching:
+                bsstr = new_specimen.bitstring.to01()
+                if bsstr in self.visited_cache:
+                    new_specimen.fitness = self.visited_cache[bsstr]
+                else:
+                    new_specimen.fitness = self.ffunc(new_specimen.bitstring)
+                    self.func_evals += 1
+                    self.visited_cache[bsstr] = new_specimen.fitness
             else:
                 new_specimen.fitness = self.ffunc(new_specimen.bitstring)
                 self.func_evals += 1
-                self.visited_cache[bsstr] = new_specimen.fitness
             self.current_pop.append(new_specimen)
 
     def current_best(self):
@@ -259,7 +277,7 @@ class genetic_algorithm:
                     print("Minimal variance reached, terminating...")
 
             end = timer()
-            elapsed_time = end - begintime 
+            elapsed_time = end - begintime
             if elapsed_time > max_time:
                 nonterminate = False
                 if verbose:

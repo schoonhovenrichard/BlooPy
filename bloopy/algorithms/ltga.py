@@ -20,7 +20,8 @@ class ltga(genetic_algorithm):
             min_max_problem=1, #1 for maximization problems, -1 for minimization
             searchspace=None,
             input_pop=None,
-            maxdepth=None):
+            maxdepth=None,
+            caching=True):
         r"""
         Base Linkage Tree Genetic Algorithm. Most functionalities can
             be adapted by changing input component functions.
@@ -42,6 +43,9 @@ class ltga(genetic_algorithm):
                 the GA will generate its own.
             maxdepth (int): Maximum tree depth for search masks
                 for mutual information.
+            caching (bool): If true, caches fitness for every point in search space
+                    visited (repeated visits do not count towards function evaluation.
+                    Should not be used for stochastic optimization.
         """
         self.sspace = searchspace
         if self.sspace is None:
@@ -57,7 +61,8 @@ class ltga(genetic_algorithm):
                 min_max_problem,
                 searchspace,
                 input_pop,
-                None)#Mutations are not used
+                mutation=None,
+                caching=caching)#Mutations are not used
         self.boundary_list = None
         if maxdepth is None:
             self.maxdepth = self.bs_size
@@ -126,24 +131,34 @@ class ltga(genetic_algorithm):
         return bitarray(linstring)
 
     def set_fitness_log(self, sol):
-        bsstr = sol.bitstring.to01()
-        if bsstr in self.visited_cache:
-            # Cache is logarithmic!
-            sol.fitness = self.visited_cache[bsstr]
+        if self.caching:
+            bsstr = sol.bitstring.to01()
+            if bsstr in self.visited_cache:
+                # Cache is logarithmic!
+                sol.fitness = self.visited_cache[bsstr]
+            else:
+                #NOTE: sol bitstring is logarithmic
+                linbs = self.cast_to_linear(sol.bitstring)
+                sol.fitness = self.ffunc(linbs)
+                self.visited_cache[bsstr] = sol.fitness
+                self.func_evals += 1
         else:
             #NOTE: sol bitstring is logarithmic
             linbs = self.cast_to_linear(sol.bitstring)
             sol.fitness = self.ffunc(linbs)
-            self.visited_cache[bsstr] = sol.fitness
             self.func_evals += 1
 
     def set_fitness(self, sol):
-        bsstr = sol.bitstring.to01()
-        if bsstr in self.visited_cache:
-            sol.fitness = self.visited_cache[bsstr]
+        if self.caching:
+            bsstr = sol.bitstring.to01()
+            if bsstr in self.visited_cache:
+                sol.fitness = self.visited_cache[bsstr]
+            else:
+                sol.fitness = self.ffunc(sol.bitstring)
+                self.visited_cache[bsstr] = sol.fitness
+                self.func_evals += 1
         else:
             sol.fitness = self.ffunc(sol.bitstring)
-            self.visited_cache[bsstr] = sol.fitness
             self.func_evals += 1
 
     def one_generation(self):

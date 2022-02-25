@@ -50,25 +50,29 @@ class StopAlgorithm(object):
             return False
 
 class basin_hopping(continuous_base):
-    def __init__(self, fitness_function, minmax_problem, searchspace, T=1.0, method='L-BFGS-B'):
+    def __init__(self, fitness_function, minmax_problem, searchspace, T=1.0, method='L-BFGS-B', caching=True):
         r"""
-        Base Differential Evolutions algorithm.
+        Basin hopping algorithm.
 
         Args:
             fitness_function (bitarray() -> float): Function that
                 scores fitness of bitstrings.
-            bitstring_size (int): Length of the bitstring instances.
             min_max_problem (int): 1 if maximization problem, -1 for
                     minimization problem. Default is 1.
             searchspace (dict(params, vals)): Dict that contains the
                 tunable variables and their possible values.
-            hillclimb (bool): (optional) Should solution be hillclimbed
-                afterwards (calls polish=True for scipy.optimize).
-                Default is False.
+            T (float): Temperature that determines likelihood of basin swap.
+            method (str): internal optimization routine.
+                supported_methods = ["Nelder-Mead", "Powell", "CG",
+                            "L-BFGS-B", "COBYLA", "SLSQP", "BFGS"]
+            caching (bool): If true, caches fitness for every point in search space
+                    visited (repeated visits do not count towards function evaluation.
+                    Should not be used for stochastic optimization.
         """
         super().__init__(fitness_function,
                 minmax_problem,
-                searchspace)
+                searchspace,
+                caching=caching)
         self.temp = T
         self.method = method
 
@@ -90,15 +94,22 @@ class basin_hopping(continuous_base):
         Intermediate function to supply to scipy.optimize function.
         """
         float_indiv = continuous_individual(y, self.sspace, scaling=self.eps)
-        bsstr = float_indiv.bitstring.to01()
-        if bsstr in self.visited_cache:
-            fit = self.visited_cache[bsstr]
+        if self.caching:
+            bsstr = float_indiv.bitstring.to01()
+            if bsstr in self.visited_cache:
+                fit = self.visited_cache[bsstr]
+            else:
+                # These optimizers do only minimization problems, for maximization,
+                #  we flip the fitness to negative for it to work.
+                fit = -1 * self.minmax * self.ffunc(float_indiv.bitstring)
+                self.nfeval += 1
+                self.visited_cache[bsstr] = fit
         else:
             # These optimizers do only minimization problems, for maximization,
             #  we flip the fitness to negative for it to work.
             fit = -1 * self.minmax * self.ffunc(float_indiv.bitstring)
             self.nfeval += 1
-            self.visited_cache[bsstr] = fit
+
         if self.solution_fit is None or fit < self.solution_fit:
             self.solution = y
             self.solution_fit = fit
@@ -138,13 +149,13 @@ class basin_hopping(continuous_base):
         bnds = self.get_scaling()
         minimizer_dict = dict()
         minimizer_dict['method'] = self.method
-        
+
         if self.method in ["L-BFGS-B", "SLSQP"]:
             lb = np.array(bnds)[:,0]
             ub = np.array(bnds)[:,1]
             bounds = scipy.optimize.Bounds(lb, ub)
             minimizer_dict['bounds'] = bounds
-        
+
         if self.method in ["CG", "L-BFGS-B", "SLSQP", "BFGS"]:
             options['eps'] = self.eps
         elif self.method == "COBYLA":

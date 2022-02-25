@@ -15,7 +15,7 @@ from bloopy.algorithms.continuous_base import continuous_base
 
 
 class pyswarms_pso(continuous_base):
-    def __init__(self, fitness_function, minmax_problem, searchspace, n_particles=100, w=0.5, c1=2, c2=1, k=10, p=1, topology=Ring(), scaling=None):
+    def __init__(self, fitness_function, minmax_problem, searchspace, n_particles=100, w=0.5, c1=2, c2=1, k=10, p=1, topology=Ring(), scaling=None, caching=True):
         r"""
         Base Particle Swarm Algorithm using PySwarms.
 
@@ -35,7 +35,8 @@ class pyswarms_pso(continuous_base):
         """
         super().__init__(fitness_function,
                 minmax_problem,
-                searchspace)
+                searchspace,
+                caching=caching)
         self.nparts = n_particles
         self.params = dict()
         self.params['w'] = w
@@ -69,15 +70,22 @@ class pyswarms_pso(continuous_base):
         scaling = kwargs['eps']
         for k in range(y.shape[0]):
             float_indiv = continuous_individual(y[k], searchspace, scaling=scaling)
-            bsstr = float_indiv.bitstring.to01()
-            if bsstr in self.visited_cache:
-                fit = self.visited_cache[bsstr]
+            if self.caching:
+                bsstr = float_indiv.bitstring.to01()
+                if bsstr in self.visited_cache:
+                    fit = self.visited_cache[bsstr]
+                else:
+                    # These optimizers do only minimization problems, for maximization,
+                    #  we flip the fitness to negative for it to work.
+                    fit = -1 * self.minmax * self.ffunc(float_indiv.bitstring)
+                    self.nfeval += 1
+                    self.visited_cache[bsstr] = fit
             else:
                 # These optimizers do only minimization problems, for maximization,
                 #  we flip the fitness to negative for it to work.
                 fit = -1 * self.minmax * self.ffunc(float_indiv.bitstring)
                 self.nfeval += 1
-                self.visited_cache[bsstr] = fit
+
             fitnesses.append(fit)
         if self.nfeval >= self.maxf:
             raise Exception("Callback to break computation pyswarms")
@@ -125,16 +133,25 @@ class pyswarms_pso(continuous_base):
             best_fit = None
             for x in parts:
                 float_indiv = continuous_individual(x, self.sspace, scaling=self.eps)
-                bsstr = float_indiv.bitstring.to01()
-                if bsstr in self.visited_cache:
-                    fit = self.visited_cache[bsstr]
+                if self.caching:
+                    bsstr = float_indiv.bitstring.to01()
+                    if bsstr in self.visited_cache:
+                        fit = self.visited_cache[bsstr]
+                        # Because fitness is negative for maximization problems,
+                        #   this auto works
+                        if best_fit is None or fit < best_fit:
+                            best_fit = fit
+                            best_part = x
+                    else:
+                        raise Exception("Whats going on here?")
+                else:
+                    fit = -1 * self.minmax * self.ffunc(float_indiv.bitstring)
                     # Because fitness is negative for maximization problems,
                     #   this auto works
                     if best_fit is None or fit < best_fit:
                         best_fit = fit
                         best_part = x
-                else:
-                    raise Exception("Whats going on here?")
+
             # Because fitness is negative for maximization problems, this auto works
             if best_fit < final_best_cost:
                 solution = (best_fit, best_part)
