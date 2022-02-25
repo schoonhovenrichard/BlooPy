@@ -21,7 +21,8 @@ class discrete_diffevo(genetic_algorithm):
             searchspace=None,
             input_pop=None,
             mutrange=(0.2,0.7),
-            recomb=0.9):
+            recomb=0.9,
+            caching=True):
         r"""
         Base Linkage Tree Genetic Algorithm. Most functionalities can
             be adapted by changing input component functions.
@@ -33,8 +34,8 @@ class discrete_diffevo(genetic_algorithm):
             bitstring_size (int): Length of the bitstring instances.
             min_max_problem (int): 1 if maximization problem, -1 for
                     minimization problem. Default is 1.
-            boundary_list (list(tuple(int))): (optional) None if 
-                regular bitstrings. Otherwise, list of tuples 
+            boundary_list (list(tuple(int))): (optional) None if
+                regular bitstrings. Otherwise, list of tuples
                 (start, end) of each segment of the bitstring in
                 which we can have only one 1 that points to the
                 element of the list that is active.
@@ -43,6 +44,9 @@ class discrete_diffevo(genetic_algorithm):
                 the GA will generate its own.
             maxdepth (int): Maximum tree depth for search masks
                 for mutual information.
+            caching (bool): If true, caches fitness for every point in search space
+                    visited (repeated visits do not count towards function evaluation.
+                    Should not be used for stochastic optimization.
         """
         super().__init__(fitness_function,
                 rep.mask_crossover_pair, # The reproductor is fixed now
@@ -52,7 +56,8 @@ class discrete_diffevo(genetic_algorithm):
                 min_max_problem,
                 searchspace,
                 input_pop,
-                None)#Mutations are not used
+                mutation=None,
+                caching=caching)#Mutations are not used
         self.mutrange = mutrange
         self.recomb = recomb
 
@@ -73,7 +78,7 @@ class discrete_diffevo(genetic_algorithm):
             raise Exception("Not implemented for uneven number of parents!")
         best = self.current_best()
         random.shuffle(parents)
-    
+
         mut = (self.mutrange[1]-self.mutrange[0])*random.random() + self.mutrange[0]
         for k in range(len(parents)):
             a = random.randint(0, len(parents)-1)
@@ -129,12 +134,16 @@ class discrete_diffevo(genetic_algorithm):
                     if random.random() > self.recomb:
                         bprime.bitstring[b] = parents[k].bitstring[b]
 
-            bsstr = bprime.bitstring.to01()
-            if bsstr in self.visited_cache:
-                bprime.fitness = self.visited_cache[bsstr]
+            if self.caching:
+                bsstr = bprime.bitstring.to01()
+                if bsstr in self.visited_cache:
+                    bprime.fitness = self.visited_cache[bsstr]
+                else:
+                    bprime.fitness = self.ffunc(bprime.bitstring)
+                    self.visited_cache[bsstr] = bprime.fitness
+                    self.func_evals += 1
             else:
                 bprime.fitness = self.ffunc(bprime.bitstring)
-                self.visited_cache[bsstr] = bprime.fitness
                 self.func_evals += 1
 
             # If better, replace candidate
@@ -157,7 +166,7 @@ class discrete_diffevo(genetic_algorithm):
             raise Exception("Not implemented for uneven number of parents!")
         best = self.current_best()
         random.shuffle(parents)
-    
+
         mut = (self.mutrange[1]-self.mutrange[0])*random.random() + self.mutrange[0]
         for k in range(len(parents)):
             a = random.randint(0, len(parents)-1)
@@ -220,12 +229,16 @@ class discrete_diffevo(genetic_algorithm):
                     if random.random() > self.recomb:
                         bprime.bitstring[b] = parents[k].bitstring[b]
 
-            bsstr = bprime.bitstring.to01()
-            if bsstr in self.visited_cache:
-                bprime.fitness = self.visited_cache[bsstr]
+            if self.caching:
+                bsstr = bprime.bitstring.to01()
+                if bsstr in self.visited_cache:
+                    bprime.fitness = self.visited_cache[bsstr]
+                else:
+                    bprime.fitness = self.ffunc(bprime.bitstring)
+                    self.visited_cache[bsstr] = bprime.fitness
+                    self.func_evals += 1
             else:
                 bprime.fitness = self.ffunc(bprime.bitstring)
-                self.visited_cache[bsstr] = bprime.fitness
                 self.func_evals += 1
 
             # If better, replace candidate

@@ -26,7 +26,6 @@ def RandomGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited
                     break
                 idx = shuffle[k]
                 child.bitstring[idx] = not child.bitstring[idx]
-                bsstr = child.bitstring.to01()
 
                 if allowed_vars is not None:
                     if bsstr not in allowed_vars:
@@ -34,12 +33,18 @@ def RandomGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited
                         child.fitness = candidate.fitness
                         continue
 
-                if bsstr in visited_cache:
-                    child.fitness = visited_cache[bsstr]
+                if visited_cache is not None:
+                    bsstr = child.bitstring.to01()
+                    if bsstr in visited_cache:
+                        child.fitness = visited_cache[bsstr]
+                    else:
+                        child.fitness = ffunc(child.bitstring)
+                        visited_cache[bsstr] = child.fitness
+                        func_evals += 1
                 else:
                     child.fitness = ffunc(child.bitstring)
-                    visited_cache[bsstr] = child.fitness
                     func_evals += 1
+
                 if minmax * child.fitness > minmax * candidate.fitness:
                     candidate = copy.deepcopy(child)
                     foundimprove = True
@@ -69,7 +74,6 @@ def RandomGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited
                         break
                     child.bitstring[indices[k]] = 0 # Set old one to 0
                     child.bitstring[i] = 1 # set new one to 1
-                    bsstr = child.bitstring.to01()
 
                     if allowed_vars is not None:
                         if bsstr not in allowed_vars:
@@ -78,12 +82,18 @@ def RandomGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited
                             child.fitness = candidate.fitness
                             continue
 
-                    if bsstr in visited_cache:
-                        child.fitness = visited_cache[bsstr]
+                    if visited_cache is not None:
+                        bsstr = child.bitstring.to01()
+                        if bsstr in visited_cache:
+                            child.fitness = visited_cache[bsstr]
+                        else:
+                            child.fitness = ffunc(child.bitstring)
+                            visited_cache[bsstr] = child.fitness
+                            func_evals += 1
                     else:
                         child.fitness = ffunc(child.bitstring)
-                        visited_cache[bsstr] = child.fitness
                         func_evals += 1
+
                     if minmax * child.fitness > minmax * candidate.fitness:
                         candidate = copy.deepcopy(child)
                         indices[k] = i
@@ -119,7 +129,6 @@ def OrderedGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visite
                 if maxfeval is not None and totfevals + func_evals >= maxfeval:
                     break
                 child.bitstring[k] = not child.bitstring[k]
-                bsstr = child.bitstring.to01()
 
                 if allowed_vars is not None:
                     if bsstr not in allowed_vars:
@@ -127,12 +136,18 @@ def OrderedGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visite
                         child.fitness = candidate.fitness
                         continue
 
-                if bsstr in visited_cache:
-                    child.fitness = visited_cache[bsstr]
+                if visited_cache is not None:
+                    bsstr = child.bitstring.to01()
+                    if bsstr in visited_cache:
+                        child.fitness = visited_cache[bsstr]
+                    else:
+                        child.fitness = ffunc(child.bitstring)
+                        visited_cache[bsstr] = child.fitness
+                        func_evals += 1
                 else:
                     child.fitness = ffunc(child.bitstring)
-                    visited_cache[bsstr] = child.fitness
                     func_evals += 1
+
                 if minmax * child.fitness > minmax * candidate.fitness:
                     candidate = copy.deepcopy(child)
                     foundimprove = True
@@ -164,7 +179,6 @@ def OrderedGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visite
                         break
                     child.bitstring[indices[k]] = 0 # Set old one to 0
                     child.bitstring[i] = 1 # set new one to 1
-                    bsstr = child.bitstring.to01()
 
                     if allowed_vars is not None:
                         if bsstr not in allowed_vars:
@@ -173,12 +187,18 @@ def OrderedGreedyHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visite
                             child.fitness = candidate.fitness
                             continue
 
-                    if bsstr in visited_cache:
-                        child.fitness = visited_cache[bsstr]
+                    if visited_cache is not None:
+                        bsstr = child.bitstring.to01()
+                        if bsstr in visited_cache:
+                            child.fitness = visited_cache[bsstr]
+                        else:
+                            child.fitness = ffunc(child.bitstring)
+                            visited_cache[bsstr] = child.fitness
+                            func_evals += 1
                     else:
                         child.fitness = ffunc(child.bitstring)
-                        visited_cache[bsstr] = child.fitness
                         func_evals += 1
+
                     if minmax * child.fitness > minmax * candidate.fitness:
                         candidate = copy.deepcopy(child)
                         indices[k] = i
@@ -212,7 +232,6 @@ def BestHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, 
                 if maxfeval is not None and totfevals + func_evals >= maxfeval:
                     break
                 child.bitstring[k] = not child.bitstring[k]
-                bsstr = child.bitstring.to01()
 
                 if allowed_vars is not None:
                     if bsstr not in allowed_vars:
@@ -220,11 +239,16 @@ def BestHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, 
                         child.fitness = candidate.fitness
                         continue
 
-                if bsstr in visited_cache:
-                    child.fitness = visited_cache[bsstr]
+                if visited_cache is not None:
+                    bsstr = child.bitstring.to01()
+                    if bsstr in visited_cache:
+                        child.fitness = visited_cache[bsstr]
+                    else:
+                        child.fitness = ffunc(child.bitstring)
+                        visited_cache[bsstr] = child.fitness
+                        func_evals += 1
                 else:
                     child.fitness = ffunc(child.bitstring)
-                    visited_cache[bsstr] = child.fitness
                     func_evals += 1
 
                 #If a neighbour is better, than the best found neighbours, save it
@@ -258,7 +282,6 @@ def BestHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, 
                         break
                     child.bitstring[indices[k]] = 0 # Set old one to 0
                     child.bitstring[i] = 1 # set new one to 1
-                    bsstr = child.bitstring.to01()
 
                     if allowed_vars is not None:
                         if bsstr not in allowed_vars:
@@ -267,11 +290,16 @@ def BestHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_cache, 
                             child.fitness = candidate.fitness
                             continue
 
-                    if bsstr in visited_cache:
-                        child.fitness = visited_cache[bsstr]
+                    if visited_cache is not None:
+                        bsstr = child.bitstring.to01()
+                        if bsstr in visited_cache:
+                            child.fitness = visited_cache[bsstr]
+                        else:
+                            child.fitness = ffunc(child.bitstring)
+                            visited_cache[bsstr] = child.fitness
+                            func_evals += 1
                     else:
                         child.fitness = ffunc(child.bitstring)
-                        visited_cache[bsstr] = child.fitness
                         func_evals += 1
 
                     #If a neighbour is better, than the best found neighbours, save it
@@ -308,7 +336,6 @@ def StochasticHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_c
                 if maxfeval is not None and totfevals + func_evals >= maxfeval:
                     break
                 child.bitstring[k] = not child.bitstring[k]
-                bsstr = child.bitstring.to01()
 
                 if allowed_vars is not None:
                     if bsstr not in allowed_vars:
@@ -316,11 +343,16 @@ def StochasticHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_c
                         child.fitness = candidate.fitness
                         continue
 
-                if bsstr in visited_cache:
-                    child.fitness = visited_cache[bsstr]
+                if visited_cache is not None:
+                    bsstr = child.bitstring.to01()
+                    if bsstr in visited_cache:
+                        child.fitness = visited_cache[bsstr]
+                    else:
+                        child.fitness = ffunc(child.bitstring)
+                        visited_cache[bsstr] = child.fitness
+                        func_evals += 1
                 else:
                     child.fitness = ffunc(child.bitstring)
-                    visited_cache[bsstr] = child.fitness
                     func_evals += 1
 
                 if minmax * child.fitness > minmax * candidate.fitness:
@@ -348,7 +380,6 @@ def StochasticHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_c
                         break
                     child.bitstring[indices[k]] = 0 # Set old one to 0
                     child.bitstring[i] = 1 # set new one to 1
-                    bsstr = child.bitstring.to01()
 
                     if allowed_vars is not None:
                         if bsstr not in allowed_vars:
@@ -357,12 +388,18 @@ def StochasticHillclimb(candidate, ffunc, minmax, totfevals, maxfeval, visited_c
                             child.fitness = candidate.fitness
                             continue
 
-                    if bsstr in visited_cache:
-                        child.fitness = visited_cache[bsstr]
+                    if visited_cache is not None:
+                        bsstr = child.bitstring.to01()
+                        if bsstr in visited_cache:
+                            child.fitness = visited_cache[bsstr]
+                        else:
+                            child.fitness = ffunc(child.bitstring)
+                            visited_cache[bsstr] = child.fitness
+                            func_evals += 1
                     else:
                         child.fitness = ffunc(child.bitstring)
-                        visited_cache[bsstr] = child.fitness
                         func_evals += 1
+
                     if minmax * child.fitness > minmax * candidate.fitness:
                         improved_candidate = copy.deepcopy(child)
                         uphill_moves.append((improved_candidate, abs(child.fitness-candidate.fitness)))

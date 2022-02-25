@@ -46,22 +46,26 @@ class StopAlgorithm(object):
 
 
 class dual_annealing(continuous_base):
-    def __init__(self, fitness_function, minmax_problem, searchspace, method = 'BFGS'):
+    def __init__(self, fitness_function, minmax_problem, searchspace, method = 'BFGS', caching=True):
         r"""
-        Base Dual Annealing algorithm.
+        Dual Annealing algorithm.
 
         Args:
             fitness_function (bitarray() -> float): Function that
                 scores fitness of bitstrings.
-            bitstring_size (int): Length of the bitstring instances.
             min_max_problem (int): 1 if maximization problem, -1 for
                     minimization problem. Default is 1.
             searchspace (dict(params, vals)): Dict that contains the
                 tunable variables and their possible values.
+            method (str): Internal minimization routine.
+            caching (bool): If true, caches fitness for every point in search space
+                    visited (repeated visits do not count towards function evaluation.
+                    Should not be used for stochastic optimization.
         """
         super().__init__(fitness_function,
                 minmax_problem,
-                searchspace)
+                searchspace,
+                caching=caching)
         self.method = method
         supported_methods = ['COBYLA','L-BFGS-B','SLSQP','CG','Powell','Nelder-Mead', 'BFGS', 'trust-constr']
         if self.method not in supported_methods:
@@ -72,15 +76,22 @@ class dual_annealing(continuous_base):
         Intermediate function to supply to scipy.optimize function.
         """
         float_indiv = continuous_individual(y, self.sspace, scaling=self.eps)
-        bsstr = float_indiv.bitstring.to01()
-        if bsstr in self.visited_cache:
-            fit = self.visited_cache[bsstr]
+        if self.caching:
+            bsstr = float_indiv.bitstring.to01()
+            if bsstr in self.visited_cache:
+                fit = self.visited_cache[bsstr]
+            else:
+                # These optimizers do only minimization problems, for maximization,
+                #  we flip the fitness to negative for it to work.
+                fit = -1 * self.minmax * self.ffunc(float_indiv.bitstring)
+                self.nfeval += 1
+                self.visited_cache[bsstr] = fit
         else:
             # These optimizers do only minimization problems, for maximization,
             #  we flip the fitness to negative for it to work.
             fit = -1 * self.minmax * self.ffunc(float_indiv.bitstring)
             self.nfeval += 1
-            self.visited_cache[bsstr] = fit
+
         if self.solution_fit is None or fit < self.solution_fit:
             self.solution = y
             self.solution_fit = fit

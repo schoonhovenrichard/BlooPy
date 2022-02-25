@@ -10,7 +10,7 @@ from bloopy.individual import individual
 from bloopy.algorithms.local_search import multi_start_local_search_base
 
 class simulated_annealing(multi_start_local_search_base):
-    def __init__(self, fitness_function, bitstring_size, min_max_problem, exploration, T0=10000000.0, Tmin=1e-5, hillclimb=None, searchspace=None, neighbour="Hamming"):
+    def __init__(self, fitness_function, bitstring_size, min_max_problem, exploration,T0=10000000.0, Tmin=1e-5, hillclimb=None, searchspace=None, neighbour="Hamming", caching=True):
         r"""
         Base Simulated Annealing algorithm. Different options for
             temperature distribution are available.
@@ -28,8 +28,11 @@ class simulated_annealing(multi_start_local_search_base):
             hillclimb (func): Optional hillclimber function.
             searchspace (dict): Mapping of settings to fitnesses
             neighbour (string): Method for generating neighbour solutions to visit.
+            caching (bool): If true, caches fitness for every point in search space
+                    visited (repeated visits do not count towards function evaluation.
+                    Should not be used for stochastic optimization.
         """
-        super().__init__(fitness_function, bitstring_size, min_max_problem, searchspace=searchspace, neighbour=neighbour)
+        super().__init__(fitness_function, bitstring_size, min_max_problem, searchspace=searchspace, neighbour=neighbour, caching=caching)
         self.exploration = exploration
         self.T0 = T0
         self.Tmin = Tmin
@@ -50,19 +53,24 @@ class simulated_annealing(multi_start_local_search_base):
         #return self.T0 / float(k)
         #return self.T0 / float(np.log(k+1))
         return self.T0 * np.exp(self.C*k/float(self.iters))
-    
+
     def generate_initial_candidate(self):
         r"""
         Generate starting solution.
         """
         self.current_candidate = individual(self.bs_size, boundary_list=self.boundary_list)
-        bsstr = self.current_candidate.bitstring.to01()
-        if bsstr in self.visited_cache:
-            self.current_candidate.fitness = self.visited_cache[bsstr]
+        if self.caching:
+            bsstr = self.current_candidate.bitstring.to01()
+            if bsstr in self.visited_cache:
+                self.current_candidate.fitness = self.visited_cache[bsstr]
+            else:
+                self.current_candidate.fitness = self.ffunc(self.current_candidate.bitstring)
+                self.func_evals += 1
+                self.visited_cache[bsstr] = self.current_candidate.fitness
         else:
-            self.current_candidate.fitness = self.ffunc(self.current_candidate.bitstring)
-            self.visited_cache[bsstr] = self.current_candidate.fitness
-            self.func_evals += 1
+                self.current_candidate.fitness = self.ffunc(self.current_candidate.bitstring)
+                self.func_evals += 1
+
         if self.best_candidate is None or self.best_candidate.fitness*self.minmax < self.current_candidate.fitness*self.minmax:
             self.best_candidate = copy.deepcopy(self.current_candidate)
 
@@ -78,13 +86,18 @@ class simulated_annealing(multi_start_local_search_base):
             self.point_mutate(new_candidate)
 
         # Get fitness of new candidate
-        bsstr = new_candidate.bitstring.to01()
-        if bsstr in self.visited_cache:
-            new_candidate.fitness = self.visited_cache[bsstr]
+        if self.caching:
+            bsstr = new_candidate.bitstring.to01()
+            if bsstr in self.visited_cache:
+                new_candidate.fitness = self.visited_cache[bsstr]
+            else:
+                new_candidate.fitness = self.ffunc(new_candidate.bitstring)
+                self.func_evals += 1
+                self.visited_cache[bsstr] = new_candidate.fitness
         else:
-            new_candidate.fitness = self.ffunc(new_candidate.bitstring)
-            self.visited_cache[bsstr] = new_candidate.fitness
-            self.func_evals += 1
+                new_candidate.fitness = self.ffunc(new_candidate.bitstring)
+                self.func_evals += 1
+
         if self.best_candidate is None or self.best_candidate.fitness*self.minmax < new_candidate.fitness*self.minmax:
             self.best_candidate = copy.deepcopy(new_candidate)
 

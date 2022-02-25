@@ -10,7 +10,7 @@ from bloopy.individual import continuous_individual
 
 
 class continuous_base:
-    def __init__(self, fitness_function, minmax_problem, searchspace):
+    def __init__(self, fitness_function, minmax_problem, searchspace, caching=True):
         r"""
         Base class for all optimizers that work on real-valued vector
           solutions.
@@ -22,12 +22,19 @@ class continuous_base:
                     minimization problem. Default is 1.
             searchspace (dict(params, vals)): Dict that contains the
                 tunable variables and their possible values.
+            caching (bool): If true, caches fitness for every point in search space
+                    visited (repeated visits do not count towards function evaluation.
+                    Should not be used for stochastic optimization.
         """
         self.ffunc = fitness_function
         self.minmax = minmax_problem
         self.sspace = searchspace
         self.boundary_list = utils.generate_boundary_list(self.sspace)
-        self.visited_cache = dict()
+        self.caching = caching
+        if self.caching:
+            self.visited_cache = dict()
+        else:
+            self.visited_cache = None
         self.nfeval = 0
 
     def get_bounds(self):
@@ -54,11 +61,15 @@ class continuous_base:
         Cost function to optimize.
         """
         float_indiv = continuous_individual(y, self.sspace, scaling=self.eps)
-        bsstr = float_indiv.bitstring.to01()
-        if bsstr in self.visited_cache:
-            return self.visited_cache[bsstr]
+        if self.caching:
+            bsstr = float_indiv.bitstring.to01()
+            if bsstr in self.visited_cache:
+                fit = self.visited_cache[bsstr]
+            else:
+                fit = self.ffunc(float_indiv.bitstring)
+                self.nfeval += 1
+                self.visited_cache[bsstr] = fit
         else:
             fit = self.ffunc(float_indiv.bitstring)
             self.nfeval += 1
-            self.visited_cache[bsstr] = fit
-            return fit
+        return fit

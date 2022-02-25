@@ -10,7 +10,7 @@ from bloopy.individual import individual
 
 
 class random_sampling:
-    def __init__(self, fitness_function, bitstring_size, minmax_problem, searchspace=None):
+    def __init__(self, fitness_function, bitstring_size, minmax_problem, searchspace=None, caching=True):
         r"""
         Random sampling algorithm. Randomly draws examples from the searchspace
             until the maximum number of evaluations has been reached. Method
@@ -24,21 +24,25 @@ class random_sampling:
                     minimization problem. Default is 1.
             searchspace (dict(params, vals)): Dict that contains the
                 tunable variables and their possible values.
-            boundary_list (list(tuple(int))): (optional) None if 
-                regular bitstrings. Otherwise, list of tuples 
-                (start, end) of each segment of the bitstring in
-                which we can have only one 1 that points to the
-                element of the list that is active.
+            caching (bool): If true, caches fitness for every point in search space
+                    visited (repeated visits do not count towards function evaluation.
+                    Should not be used for stochastic optimization.
         """
         self.ffunc = fitness_function
         self.minmax = minmax_problem
         self.bs_size = bitstring_size
         self.sspace = searchspace
+        self.caching = caching
+        self.func_evals = 0
         if searchspace is None:
             self.boundary_list = None
         else:
             self.boundary_list = utils.generate_boundary_list(searchspace)
-    
+        if self.caching:
+            self.visited_cache = dict()
+        else:
+            self.visited_cache = None
+
     def solve(self,
             max_time, # Max running time in seconds
             stopping_fitness, # If we know the best solution, may as well stop early
@@ -64,20 +68,27 @@ class random_sampling:
             self.func_evals (int): Total number of Fevals performed.
         """
         begintime = timer()
-        previous_draws = []
         candidate = individual(self.bs_size, boundary_list=self.boundary_list)
         best_candidate = None
-        max_redraws = 10
         for evl in range(max_funcevals):
             candidate.generate_random(self.boundary_list)
-            cache_redraws = 0
-            while candidate.bitstring in previous_draws:
-                candidate.generate_random(self.boundary_list)
-                cache_redraws += 1
-                if cache_redraws >= max_redraws:
-                    break
-            previous_draws.append(candidate.bitstring)
+
+            bsstr = candidate.bitstring.to01()
+            if self.caching:
+                max_redraws = 10
+                cache_redraws = 0
+                while cache_redraws <= max_redraws:
+                    if bsstr not in self.visited_cache:
+                        break
+                    cache_redraws += 1
+                    candidate.generate_random(self.boundary_list)
+                    bsstr = candidate.bitstring.to01()
+
             candidate.fitness = self.ffunc(candidate.bitstring)
+            self.func_evals += 1
+            if self.caching:
+                bsstr = candidate.bitstring.to01()
+                self.visited_cache[bsstr] = candidate.fitness
 
             # Record best draw
             if best_candidate is None or best_candidate.fitness*self.minmax < candidate.fitness*self.minmax:
@@ -94,4 +105,4 @@ class random_sampling:
             if stopping_fitness is not None:
                 if self.minmax * best_candidate.fitness >= self.minmax * stopping_fitness:
                     break
-        return (best_candidate.fitness, best_candidate, max_funcevals)
+        return (best_candidate.fitness, best_candidate, self.func_evals)

@@ -45,9 +45,9 @@ class StopAlgorithm(object):
 
 
 class differential_evolution(continuous_base):
-    def __init__(self, fitness_function, minmax_problem, searchspace, method=None, hillclimb=False, pop_size=15, mutation=(0.5,1), recombination=0.7):
+    def __init__(self, fitness_function, minmax_problem, searchspace, method=None, hillclimb=False, pop_size=15, mutation=(0.5,1), recombination=0.7, caching=True):
         r"""
-        Base Differential Evolutions algorithm.
+        Differential Evolution algorithm.
 
         Args:
             fitness_function (bitarray() -> float): Function that
@@ -61,10 +61,19 @@ class differential_evolution(continuous_base):
                 afterwards (calls polish=True for scipy.optimize).
                 Default is False.
             pop_size (int): (optional) Populations size, default is 15.
+            mutation (tuple(float, float)): Mutation constant, higher
+                values slow down convergence, but increases search radius.
+            recombination (float): Recombination constant, more children
+                to progress into the next generation, but at the risk of
+                population stability.
+            caching (bool): If true, caches fitness for every point in search space
+                    visited (repeated visits do not count towards function evaluation.
+                    Should not be used for stochastic optimization.
         """
         super().__init__(fitness_function,
                 minmax_problem,
-                searchspace)
+                searchspace,
+                caching=caching)
         self.method = method
         self.hillclimb = hillclimb
         self.pop_size = pop_size
@@ -84,15 +93,22 @@ class differential_evolution(continuous_base):
         NOTE: The "-1 *" is because differential evolution only does maximization
         """
         float_indiv = continuous_individual(y, self.sspace, scaling=self.eps)
-        bsstr = float_indiv.bitstring.to01()
-        if bsstr in self.visited_cache:
-            fit = self.visited_cache[bsstr]
+        if self.caching:
+            bsstr = float_indiv.bitstring.to01()
+            if bsstr in self.visited_cache:
+                fit = self.visited_cache[bsstr]
+            else:
+                # These optimizers do only minimization problems, for maximization,
+                #  we flip the fitness to negative for it to work.
+                fit = -1 * self.minmax * self.ffunc(float_indiv.bitstring)
+                self.nfeval += 1
+                self.visited_cache[bsstr] = fit
         else:
             # These optimizers do only minimization problems, for maximization,
             #  we flip the fitness to negative for it to work.
             fit = -1 * self.minmax * self.ffunc(float_indiv.bitstring)
             self.nfeval += 1
-            self.visited_cache[bsstr] = fit
+
         if self.solution_fit is None or fit < self.solution_fit:
             self.solution = y
             self.solution_fit = fit

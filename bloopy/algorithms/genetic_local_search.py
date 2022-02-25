@@ -18,7 +18,8 @@ class genetic_local_search(genetic_algorithm):
             min_max_problem=1, #1 for maximization problems, -1 for minimization
             searchspace=None,
             input_pop=None,
-            neighbour="adjacent"):
+            neighbour="adjacent",
+            caching=True):
         r"""
         Base genetic local search. Most functionalities can be adapted
             by changing input component functions.
@@ -38,6 +39,10 @@ class genetic_local_search(genetic_algorithm):
             input_pop (list(individual)): (optional) Possible input
                 population from which to start algorithm. If None,
                 the GA will generate its own.
+            neighbour (string): Method for generating neighbour solutions to visit.
+            caching (bool): If true, caches fitness for every point in search space
+                    visited (repeated visits do not count towards function evaluation.
+                    Should not be used for stochastic optimization.
         """
         super().__init__(fitness_function,
                 reproductor,
@@ -47,7 +52,8 @@ class genetic_local_search(genetic_algorithm):
                 min_max_problem=min_max_problem,
                 searchspace=searchspace,
                 input_pop=input_pop,
-                mutation=None)#Mutations are not used
+                mutation=None,
+                caching=caching)#Mutations are not used
         self.hillclimber = hillclimber
         self.nbour_method = neighbour
 
@@ -62,12 +68,16 @@ class genetic_local_search(genetic_algorithm):
 
         # Mutation step
         for i in range(len(children)):
-            bsstr = children[i].bitstring.to01()
-            if bsstr in self.visited_cache:
-                children[i].fitness = self.visited_cache[bsstr]
+            if self.caching:
+                bsstr = children[i].bitstring.to01()
+                if bsstr in self.visited_cache:
+                    children[i].fitness = self.visited_cache[bsstr]
+                else:
+                    children[i].fitness = self.ffunc(children[i].bitstring)
+                    self.visited_cache[bsstr] = children[i].fitness
+                    self.func_evals += 1
             else:
                 children[i].fitness = self.ffunc(children[i].bitstring)
-                self.visited_cache[bsstr] = children[i].fitness
                 self.func_evals += 1
 
             children[i], feval, self.visited_cache = self.hillclimber(children[i], self.ffunc, self.minmax, self.func_evals, self.maxfeval, self.visited_cache, self.nbour_method)
