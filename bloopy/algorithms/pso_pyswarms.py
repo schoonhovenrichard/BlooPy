@@ -27,9 +27,9 @@ class pyswarms_pso(continuous_base):
             searchspace (dict(params, vals)): Dict that contains the
                 tunable variables and their possible values.
             n_particles (int): (optional) Number of swarm particles, default is 100.
-            w (float): Intertia constant.
+            w (float): Inertia constant.
             c1 (float): Cognitive constant.
-            c2 (float): Socal constant.
+            c2 (float): Social constant.
             k (int): Number of neighbours to be considered.
             p (int): Minskowski p-norm for topology.
         """
